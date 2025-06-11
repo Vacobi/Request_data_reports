@@ -1,0 +1,23 @@
+version: '1'
+services:
+  master_postgres:
+    image: postgres:15
+    container_name: master_postgres
+    environment:
+      POSTGRES_DB: data_generation_db
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: pswd
+    ports:
+      - "5432:5432"
+
+  data_generation:
+    build: .
+    container_name: data_generation
+    ports:
+      - '8080:8080'
+    environment:
+      - spring.datasource.url=jdbc:postgresql://master_postgres:5432/data_generation_db
+      - spring.datasource.username=root
+      - spring.datasource.password=pswd
+    depends_on:
+      - master_postgres

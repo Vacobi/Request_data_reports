@@ -1,0 +1,1 @@
+docker-compose -p infra-data_generation up master_postgres

@@ -4,11 +4,11 @@ services:
     image: postgres:15
     container_name: master_postgres
     environment:
-      POSTGRES_DB: data_generation_db
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: pswd
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=pswd
+      - POSTGRES_DB=data_generation_db
     ports:
-      - "5432:5432"
+      - '5432:5432'
 
   data_generation:
     build: .

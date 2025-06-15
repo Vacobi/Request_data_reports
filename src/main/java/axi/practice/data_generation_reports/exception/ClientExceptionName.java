@@ -5,7 +5,11 @@ import lombok.Getter;
 @Getter
 public enum ClientExceptionName {
     VALIDATION_EXCEPTION(800),
-    GROUP_VALIDATION_EXCEPTION(801);
+    GROUP_VALIDATION_EXCEPTION(801),
+
+    INVALID_HEADER(200),
+    INVALID_QUERY_PARAM(201),
+    INVALID_REQUEST(202);
 
     private final int apiErrorCode;
 

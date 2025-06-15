@@ -30,7 +30,7 @@ public class Request {
     @Column(name="body")
     private String body;
 
-    @Column(name="timestamp")
+    @Column(name="created_at")
     private LocalDateTime timestamp;
 
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

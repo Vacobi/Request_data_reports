@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class RequestDto {
     private String url;
     private String path;
     private String body;
+    private LocalDateTime timestamp;
 
     @Builder.Default
     private List<HeaderDto> headers = new LinkedList<>();

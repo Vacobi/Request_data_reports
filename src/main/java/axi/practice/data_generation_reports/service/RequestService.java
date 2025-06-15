@@ -6,8 +6,10 @@ import axi.practice.data_generation_reports.dto.request.RequestDto;
 import axi.practice.data_generation_reports.entity.Header;
 import axi.practice.data_generation_reports.entity.QueryParam;
 import axi.practice.data_generation_reports.entity.Request;
+import axi.practice.data_generation_reports.exception.IncorrectRawRequest;
 import axi.practice.data_generation_reports.mapper.HeaderMapper;
 import axi.practice.data_generation_reports.mapper.QueryParamMapper;
+import axi.practice.data_generation_reports.mapper.RawHttpToJsonMapper;
 import axi.practice.data_generation_reports.mapper.RequestMapper;
 import axi.practice.data_generation_reports.validator.RequestValidator;
 import jakarta.transaction.Transactional;
@@ -25,6 +27,21 @@ public class RequestService {
     private final RequestMapper requestMapper;
     private final HeaderMapper headerMapper;
     private final QueryParamMapper queryParamMapper;
+
+    private final RawHttpToJsonMapper rawHttpToJsonMapper;
+
+    @Transactional
+    public RequestDto create(String raw) {
+
+        CreateRequestDto createRequestDto;
+        try {
+            createRequestDto = rawHttpToJsonMapper.toCreateRequestDto(raw);
+        } catch (Exception e) {
+            throw new IncorrectRawRequest(raw);
+        }
+
+        return create(createRequestDto);
+    }
 
     @Transactional
     public RequestDto create(CreateRequestDto createRequestDto) {

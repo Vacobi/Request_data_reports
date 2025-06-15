@@ -20,4 +20,9 @@ public class RequestController {
     public RequestDto create(@RequestBody CreateRequestDto requestDto) {
         return requestService.create(requestDto);
     }
+
+    @PostMapping("/raw")
+    public RequestDto create(@RequestBody String raw) {
+        return requestService.create(raw);
+    }
 }

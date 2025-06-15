@@ -63,4 +63,11 @@ public class Request {
                 : "null") +
                 '}';
     }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.timestamp == null) {
+            this.timestamp = LocalDateTime.now();
+        }
+    }
 }

@@ -30,7 +30,6 @@ public class RawHttpToJsonMapper {
         URIBuilder b = new URIBuilder(uri);
 
         String host = Objects.equals(uri.getHost(), "") ? null : uri.getHost();
-        String url = host == null ? null : host + (uri.getPort() == -1 ? "" : ":" + uri.getPort());
         String path = Objects.equals(uri.getPath(), "")
                 ? null
                 : (uri.getPath().startsWith("/")
@@ -46,7 +45,7 @@ public class RawHttpToJsonMapper {
         );
 
         return CreateRequestDto.builder()
-                .url(url)
+                .url(host)
                 .path(path)
                 .variableParams(queryParams)
                 .build();

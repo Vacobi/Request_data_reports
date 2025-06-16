@@ -120,7 +120,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(createRequestDto);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -210,7 +210,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(createRequestDto);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -288,7 +288,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(createRequestDto);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -366,7 +366,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(createRequestDto);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -454,7 +454,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(createRequestDto);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -536,7 +536,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(createRequestDto);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -635,7 +635,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(raw);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -649,6 +649,84 @@ class RequestServiceTest extends ClearableTest {
 
             List<String> expectedQueryParamNames = List.of("q", "lang", "safe");
             List<String> expectedQueryParamValues = List.of("openai", "en", "active");
+
+            List<HeaderDto> expectedHeadersDto = new LinkedList<>();
+            List<Header> expectedHeaders = new LinkedList<>();
+
+            List<QueryParamDto> expectedQueryParamsDto = new LinkedList<>();
+            for (int i = 0; i < queryParamsCount; i++) {
+                QueryParamDto queryParamDto = QueryParamDto.builder()
+                        .id(actualDto.getVariableParams().get(i).getId())
+                        .name(expectedQueryParamNames.get(i))
+                        .value(expectedQueryParamValues.get(i))
+                        .build();
+                expectedQueryParamsDto.add(queryParamDto);
+            }
+            List<QueryParam> expectedQueryParams = new LinkedList<>();
+            for (int i = 0; i < queryParamsCount; i++) {
+                QueryParam queryParam = QueryParam.builder()
+                        .id(actualDto.getVariableParams().get(i).getId())
+                        .name(expectedQueryParamNames.get(i))
+                        .value(expectedQueryParamValues.get(i))
+                        .build();
+                queryParam.setRequest(actual);
+                expectedQueryParams.add(queryParam);
+            }
+
+            String expectedUrl = "google.com";
+            String expectedPath = "search";
+
+            RequestDto expectedDto = RequestDto.builder()
+                    .id(actualDto.getId())
+                    .url(expectedUrl)
+                    .path(expectedPath)
+                    .timestamp(actual.getTimestamp())
+                    .headers(expectedHeadersDto)
+                    .variableParams(expectedQueryParamsDto)
+                    .build();
+
+            Request expected = Request.builder()
+                    .id(actualDto.getId())
+                    .url(expectedUrl)
+                    .path(expectedPath)
+                    .timestamp(actual.getTimestamp())
+                    .headers(expectedHeaders)
+                    .queryParams(expectedQueryParams)
+                    .build();
+
+
+            assertRequestDtoEquals(expectedDto, actualDto);
+            assertEquals(headersBeforeSave + headersCount, headersAfterSave);
+            assertEquals(queryParamsBeforeSave + queryParamsCount, queryParamsAfterSave);
+            assertEquals(requestBeforeSave + 1, requestAfterSave);
+            assertRequestEquals(expected, actual);
+        }
+
+        @Test
+        void createRequestWithPort() {
+
+            String raw = "https://google.com:8080/search?q=openai";
+
+
+            long headersBeforeSave = headerDao.count();
+            long queryParamsBeforeSave = queryParamDao.count();
+            long requestBeforeSave = requestDao.count();
+
+            RequestDto actualDto = requestService.create(raw);
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
+            assertTrue(actualOptional.isPresent());
+            Request actual = actualOptional.get();
+
+            long headersAfterSave = headerDao.count();
+            long queryParamsAfterSave = queryParamDao.count();
+            long requestAfterSave = requestDao.count();
+
+
+            int queryParamsCount = 1;
+            int headersCount = 0;
+
+            List<String> expectedQueryParamNames = List.of("q");
+            List<String> expectedQueryParamValues = List.of("openai");
 
             List<HeaderDto> expectedHeadersDto = new LinkedList<>();
             List<Header> expectedHeaders = new LinkedList<>();

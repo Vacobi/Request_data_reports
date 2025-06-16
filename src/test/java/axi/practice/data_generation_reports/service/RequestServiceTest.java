@@ -120,7 +120,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(createRequestDto);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -210,7 +210,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(createRequestDto);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -288,7 +288,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(createRequestDto);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -366,7 +366,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(createRequestDto);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -454,7 +454,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(createRequestDto);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -536,7 +536,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(createRequestDto);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 
@@ -635,7 +635,7 @@ class RequestServiceTest extends ClearableTest {
             long requestBeforeSave = requestDao.count();
 
             RequestDto actualDto = requestService.create(raw);
-            Optional<Request> actualOptional = requestDao.findByIdWithHeadersAndParams(actualDto.getId());
+            Optional<Request> actualOptional = requestDao.findById(actualDto.getId());
             assertTrue(actualOptional.isPresent());
             Request actual = actualOptional.get();
 

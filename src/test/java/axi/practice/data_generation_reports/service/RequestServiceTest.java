@@ -61,8 +61,8 @@ class RequestServiceTest extends ClearableTest {
         List<CreateQueryParamRequestDto> queryParamRequests = new LinkedList<>();
         for (int i = 0; i < count; i++) {
             CreateQueryParamRequestDto requestDto = CreateQueryParamRequestDto.builder()
-                    .name("name " + queryParamNumber)
-                    .value("value " + queryParamNumber)
+                    .name("name" + queryParamNumber)
+                    .value("value" + queryParamNumber)
                     .build();
 
             queryParamNumber++;
@@ -79,8 +79,8 @@ class RequestServiceTest extends ClearableTest {
         List<CreateHeaderRequestDto> headerRequests = new LinkedList<>();
         for (int i = 0; i < count; i++) {
             CreateHeaderRequestDto requestDto = CreateHeaderRequestDto.builder()
-                    .name("name " + headerNumber)
-                    .value("value " + headerNumber)
+                    .name("name" + headerNumber)
+                    .value("value" + headerNumber)
                     .build();
 
             headerNumber++;

@@ -95,6 +95,35 @@ class RequestValidatorTest {
         }
 
         @Test
+        void nameContainsInvalidChars() {
+
+            String name = "name+name";
+            String value = "value";
+            CreateQueryParamRequestDto request = CreateQueryParamRequestDto.builder()
+                    .name(name)
+                    .value(value)
+                    .build();
+
+
+            List<ClientExceptionName> expectedExceptionNameList = new LinkedList<>();
+            expectedExceptionNameList.add(ClientExceptionName.INVALID_QUERY_PARAM);
+
+
+            Optional<GroupValidationException> optionalGroupValidationException =
+                    validator.validateCreateQueryParamRequestDto(request);
+
+
+            assertTrue(optionalGroupValidationException.isPresent());
+
+            GroupValidationException groupValidationException = optionalGroupValidationException.get();
+            List<? extends ValidationException> validationExceptionList = groupValidationException.getExceptions();
+            List<ClientExceptionName> actualClientExceptionNameList = new LinkedList<>();
+            validationExceptionList.forEach(validationException -> actualClientExceptionNameList.add(validationException.getExceptionName()));
+
+            assertEquals(expectedExceptionNameList, actualClientExceptionNameList);
+        }
+
+        @Test
         void nameIsMaxLength() {
 
             String name = stringLength(maxStringLength);
@@ -175,6 +204,35 @@ class RequestValidatorTest {
 
             String name = "name";
             String value = "";
+            CreateQueryParamRequestDto request = CreateQueryParamRequestDto.builder()
+                    .name(name)
+                    .value(value)
+                    .build();
+
+
+            List<ClientExceptionName> expectedExceptionNameList = new LinkedList<>();
+            expectedExceptionNameList.add(ClientExceptionName.INVALID_QUERY_PARAM);
+
+
+            Optional<GroupValidationException> optionalGroupValidationException =
+                    validator.validateCreateQueryParamRequestDto(request);
+
+
+            assertTrue(optionalGroupValidationException.isPresent());
+
+            GroupValidationException groupValidationException = optionalGroupValidationException.get();
+            List<? extends ValidationException> validationExceptionList = groupValidationException.getExceptions();
+            List<ClientExceptionName> actualClientExceptionNameList = new LinkedList<>();
+            validationExceptionList.forEach(validationException -> actualClientExceptionNameList.add(validationException.getExceptionName()));
+
+            assertEquals(expectedExceptionNameList, actualClientExceptionNameList);
+        }
+
+        @Test
+        void valueContainsInvalidChars() {
+
+            String name = "name";
+            String value = "value=value";
             CreateQueryParamRequestDto request = CreateQueryParamRequestDto.builder()
                     .name(name)
                     .value(value)
@@ -355,6 +413,35 @@ class RequestValidatorTest {
         }
 
         @Test
+        void nameContainsInvalidChars() {
+
+            String name = "name;name";
+            String value = "value";
+            CreateHeaderRequestDto request = CreateHeaderRequestDto.builder()
+                    .name(name)
+                    .value(value)
+                    .build();
+
+
+            List<ClientExceptionName> expectedExceptionNameList = new LinkedList<>();
+            expectedExceptionNameList.add(ClientExceptionName.INVALID_HEADER);
+
+
+            Optional<GroupValidationException> optionalGroupValidationException =
+                    validator.validateCreateHeaderRequest(request);
+
+
+            assertTrue(optionalGroupValidationException.isPresent());
+
+            GroupValidationException groupValidationException = optionalGroupValidationException.get();
+            List<? extends ValidationException> validationExceptionList = groupValidationException.getExceptions();
+            List<ClientExceptionName> actualClientExceptionNameList = new LinkedList<>();
+            validationExceptionList.forEach(validationException -> actualClientExceptionNameList.add(validationException.getExceptionName()));
+
+            assertEquals(expectedExceptionNameList, actualClientExceptionNameList);
+        }
+
+        @Test
         void nameIsMaxLength() {
 
             String name = stringLength(maxStringLength);
@@ -435,6 +522,35 @@ class RequestValidatorTest {
 
             String name = "name";
             String value = "";
+            CreateHeaderRequestDto request = CreateHeaderRequestDto.builder()
+                    .name(name)
+                    .value(value)
+                    .build();
+
+
+            List<ClientExceptionName> expectedExceptionNameList = new LinkedList<>();
+            expectedExceptionNameList.add(ClientExceptionName.INVALID_HEADER);
+
+
+            Optional<GroupValidationException> optionalGroupValidationException =
+                    validator.validateCreateHeaderRequest(request);
+
+
+            assertTrue(optionalGroupValidationException.isPresent());
+
+            GroupValidationException groupValidationException = optionalGroupValidationException.get();
+            List<? extends ValidationException> validationExceptionList = groupValidationException.getExceptions();
+            List<ClientExceptionName> actualClientExceptionNameList = new LinkedList<>();
+            validationExceptionList.forEach(validationException -> actualClientExceptionNameList.add(validationException.getExceptionName()));
+
+            assertEquals(expectedExceptionNameList, actualClientExceptionNameList);
+        }
+
+        @Test
+        void valueContainsInvalidChars() {
+
+            String name = "name";
+            String value = "value\u0002value";
             CreateHeaderRequestDto request = CreateHeaderRequestDto.builder()
                     .name(name)
                     .value(value)

@@ -18,6 +18,11 @@ public class RequestValidator {
 
     private final int maxStringLength;
 
+    private static boolean validLength(String input, int maxLength) {
+        if (input == null) return true;
+        return input.length() <= maxLength;
+    }
+
     public RequestValidator(@Qualifier("maxStringLength") int maxStringLength) {
         this.maxStringLength = maxStringLength;
     }
@@ -42,7 +47,7 @@ public class RequestValidator {
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_REQUEST));
         }
 
-        if (url != null && url.length() > maxStringLength) {
+        if (!validLength(url, maxStringLength)) {
             String exceptionDescription = String.format("Url of request is too long. Max length is %d, actual %d", maxStringLength, url.length());
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_REQUEST));
         }
@@ -69,7 +74,7 @@ public class RequestValidator {
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_HEADER));
         }
 
-        if (name != null && name.length() > maxStringLength) {
+        if (!validLength(name, maxStringLength)) {
             String exceptionDescription = String.format("Name of header is too long. Max length is %d, actual %d", maxStringLength, name.length());
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_HEADER));
         }
@@ -86,7 +91,7 @@ public class RequestValidator {
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_HEADER));
         }
 
-        if (value != null && value.length() > maxStringLength) {
+        if (!validLength(value, maxStringLength)) {
             String exceptionDescription = String.format("Value of header is too long. Max length is %d, actual %d", maxStringLength, value.length());
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_HEADER));
         }
@@ -113,7 +118,7 @@ public class RequestValidator {
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_QUERY_PARAM));
         }
 
-        if (name != null && name.length() > maxStringLength) {
+        if (!validLength(name, maxStringLength)) {
             String exceptionDescription = String.format("Name of query param is too long. Max length is %d, actual %d", maxStringLength, name.length());
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_QUERY_PARAM));
         }
@@ -130,7 +135,7 @@ public class RequestValidator {
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_QUERY_PARAM));
         }
 
-        if (value != null && value.length() > maxStringLength) {
+        if (!validLength(value, maxStringLength)) {
             String exceptionDescription = String.format("Value of query param is too long. Max length is %d, actual %d", maxStringLength, value.length());
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_QUERY_PARAM));
         }

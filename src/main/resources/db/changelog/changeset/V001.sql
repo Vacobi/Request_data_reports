@@ -1,4 +1,4 @@
-create table if not exists request_filters (
+create table if not exists filters_request (
     id bigint primary key generated always as identity unique,
     from_date timestamptz,
     to_date timestamptz,

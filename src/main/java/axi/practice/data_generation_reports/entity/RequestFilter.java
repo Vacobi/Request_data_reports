@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Builder(toBuilder = true)
-@Table(name="request_filters")
+@Table(name="filters_request")
 public class RequestFilter {
 
     @Id

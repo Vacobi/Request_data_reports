@@ -24,6 +24,7 @@ request_stats AS (
     FROM filtered_requests r
 )
 SELECT
+    gen_random_uuid() as id,
     rs.host,
     rs.path,
     AVG(rs.header_count) AS avg_headers,

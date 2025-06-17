@@ -1,10 +1,7 @@
 package axi.practice.data_generation_reports.entity;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Immutable;
 
@@ -21,8 +18,9 @@ import java.util.UUID;
 public class GroupRequestStat {
 
     @Id
+    @GeneratedValue
     @Column(name="id", nullable = false)
-    private Long id;
+    private UUID id;
 
     @Column(name="host")
     private String host;

@@ -10,7 +10,8 @@ public enum ClientExceptionName {
     INVALID_HEADER(200),
     INVALID_QUERY_PARAM(201),
     INVALID_REQUEST(202),
-    INVALID_RAW_REQUEST(203);
+    INVALID_RAW_REQUEST(203),
+    INVALID_REQUEST_FILTER(204);
 
     private final int apiErrorCode;
 

@@ -17,6 +17,6 @@ public class RequestFilterDto {
     private LocalDateTime toDate;
     private String host;
     private String path;
-    private Integer avgHeaders;
-    private Integer avgQueryParams;
+    private Double avgHeaders;
+    private Double avgQueryParams;
 }

@@ -33,8 +33,8 @@ class RequestFilterServiceTest {
         final LocalDateTime toDate = LocalDateTime.of(2021, 1, 1, 0, 0);
         final String host = "google.com";
         final String path = "search";
-        final Integer avgHeaders = 2;
-        final Integer avgQueryParams = 3;
+        final Double avgHeaders = 2.0;
+        final Double avgQueryParams = 3.0;
 
         CreateRequestFilterRequestDto createRequestFilterRequestDto = CreateRequestFilterRequestDto.builder()
                 .fromDate(fromDate)
@@ -82,8 +82,8 @@ class RequestFilterServiceTest {
         final LocalDateTime toDate = null;
         final String host = null;
         final String path = null;
-        final Integer avgHeaders = null;
-        final Integer avgQueryParams = null;
+        final Double avgHeaders = null;
+        final Double avgQueryParams = null;
 
         CreateRequestFilterRequestDto createRequestFilterRequestDto = CreateRequestFilterRequestDto.builder()
                 .fromDate(fromDate)

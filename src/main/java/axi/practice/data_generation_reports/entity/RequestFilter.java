@@ -33,8 +33,8 @@ public class RequestFilter {
     private String path;
 
     @Column(name="avg_headers")
-    private Integer avgHeaders;
+    private Double avgHeaders;
 
     @Column(name="avg_query_params")
-    private Integer avgQueryParams;
+    private Double avgQueryParams;
 }

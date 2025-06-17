@@ -28,8 +28,8 @@ public class GroupRequestStat {
     private String path;
 
     @Column(name="avg_headers")
-    private int avgHeaders;
+    private Double avgHeaders;
 
     @Column(name="avg_params")
-    private int avgQueryParams;
+    private Double avgQueryParams;
 }

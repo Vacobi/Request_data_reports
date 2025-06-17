@@ -8,6 +8,8 @@ import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.Immutable;
 
+import java.util.UUID;
+
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,6 +17,7 @@ import org.hibernate.annotations.Immutable;
 @Setter
 @Builder(toBuilder = true)
 @Table(name="group_request_stats")
+@Immutable
 public class GroupRequestStat {
 
     @Id

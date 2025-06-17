@@ -14,6 +14,7 @@ import lombok.*;
 @Setter
 @Builder(toBuilder = true)
 @Table(name="request_filters")
+@Table(name="group_request_stats")
 public class GroupRequestStat {
 
     @Id

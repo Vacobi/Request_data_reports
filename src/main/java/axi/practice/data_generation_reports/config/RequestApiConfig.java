@@ -10,8 +10,16 @@ public class RequestApiConfig {
     @Value("${app.max_string_length}")
     private int maxStringLength;
 
+    @Value("${app.data_page_size}")
+    private int dataPageSize;
+
     @Bean
     public int maxStringLength() {
         return maxStringLength;
+    }
+
+    @Bean
+    public int dataPageSize() {
+        return dataPageSize;
     }
 }

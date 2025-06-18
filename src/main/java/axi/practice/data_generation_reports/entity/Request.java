@@ -34,12 +34,10 @@ public class Request {
     private LocalDateTime timestamp;
 
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @OrderColumn(name = "order_id")
     @Builder.Default
     private List<Header> headers = new LinkedList<>();
 
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @OrderColumn(name = "order_id")
     @Builder.Default
     private List<QueryParam> queryParams = new LinkedList<>();
 

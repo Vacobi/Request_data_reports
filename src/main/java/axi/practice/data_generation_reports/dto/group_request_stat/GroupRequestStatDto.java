@@ -15,6 +15,6 @@ public class GroupRequestStatDto {
     private UUID id;
     private String host;
     private String path;
-    private int avgHeaders;
-    private int avgQueryParams;
+    private double avgHeaders;
+    private double avgQueryParams;
 }

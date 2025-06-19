@@ -136,6 +136,11 @@ public class TestAsserts {
         }
     }
 
+    public static void assertBothNotNull(Object object, Object otherObject) {
+        assertNotNull(object);
+        assertNotNull(otherObject);
+    }
+
     public static boolean localDateTimeAreEquals(
             LocalDateTime first,
             LocalDateTime second

@@ -126,7 +126,7 @@ public class TestAsserts {
         assertEquals(expected.getValue(), actual.getValue());
     }
 
-    private static void assertLocalDateTimeEquals(LocalDateTime expected, LocalDateTime actual) {
+    public static void assertLocalDateTimeEquals(LocalDateTime expected, LocalDateTime actual) {
         if (expected != null && actual != null) {
             assertTrue(localDateTimeAreEquals(expected, actual));
         } else if (expected == null && actual == null) {

@@ -1,7 +1,7 @@
 package axi.practice.data_generation_reports.service;
 
 import axi.practice.data_generation_reports.dao.ReportDao;
-import axi.practice.data_generation_reports.dto.filter.RequestFilterDto;
+import axi.practice.data_generation_reports.dto.filter.CreateRequestFilterRequestDto;
 import axi.practice.data_generation_reports.dto.group_request_stat.GetGroupRequestStatsDto;
 import axi.practice.data_generation_reports.dto.group_request_stat.GroupRequestStatDto;
 import axi.practice.data_generation_reports.dto.report.CreateReportRequestDto;
@@ -13,7 +13,6 @@ import axi.practice.data_generation_reports.entity.enums.ReportStatus;
 import axi.practice.data_generation_reports.mapper.ReportMapper;
 import axi.practice.data_generation_reports.mapper.ReportRowMapper;
 import axi.practice.data_generation_reports.mapper.RequestFilterMapper;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Async;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 @Service
 @RequiredArgsConstructor
@@ -37,66 +37,68 @@ public class ReportService {
     private final ReportDao reportDao;
 
     @Async
-    @Transactional
     public CompletableFuture<ReportDto> generateReport(CreateReportRequestDto requestDto) {
+        final Report initialReport = reportDao.save(
+                Report.builder().status(ReportStatus.PENDING).build()
+        );
 
-        Report report = Report.builder()
-                .status(ReportStatus.PENDING)
-                .build();
+        return CompletableFuture.supplyAsync(() -> initialReport)
+                .thenApply(report -> updateStatus(report, ReportStatus.PROCESSING))
+                .thenApply(report -> addFilter(report, requestDto.getFilter()))
+                .thenApply(report -> generateRows(requestDto.getFilter(), report))
+                .handle((report, e) -> {
+                    if (e != null) {
+                        updateStatus(initialReport, ReportStatus.FAILED);
+                        throw unwrapCompletionException(e);
+                    }
+                    return finalizeReport(report);
+                });
+    }
 
-        CompletableFuture<Report> reportFuture = CompletableFuture.supplyAsync(() -> reportDao.save(report));
+    private Report updateStatus(Report report, ReportStatus status) {
+        report.setFinishedAt(LocalDateTime.now());
+        report.setStatus(status);
+        return reportDao.save(report);
+    }
 
-        try {
-            reportFuture = reportFuture.thenApply(currentReport -> {
-                currentReport.setStatus(ReportStatus.PROCESSING);
-                currentReport = reportDao.save(currentReport);
-                return currentReport;
-            });
+    private Report addFilter(Report report, CreateRequestFilterRequestDto filterDto) {
+        RequestFilter filter = requestFilterMapper.toRequestFilter(
+                requestFilterService.createFilter(filterDto)
+        );
+        report.setFilter(filter);
+        return reportDao.save(report);
+    }
 
-            CompletableFuture<Report> reportFutureWithFilters = reportFuture.thenApply(currentReport -> {
-                RequestFilterDto filterDto = requestFilterService.createFilter(requestDto.getFilter());
-                RequestFilter filter = requestFilterMapper.toRequestFilter(filterDto);
+    private Report generateRows(CreateRequestFilterRequestDto filterRequestDto, Report report) {
+        boolean pagesOut = false;
+        int pageNumber = 0;
+        while (!pagesOut) {
+            GetGroupRequestStatsDto getGroupRequestStatsDto = GetGroupRequestStatsDto.builder()
+                    .requestFilter(filterRequestDto)
+                    .page(pageNumber++)
+                    .build();
 
-                currentReport.setFilter(filter);
-                return reportDao.save(currentReport);
-            });
+            Page<GroupRequestStatDto> pageOfGroupRequestStats = groupRequestStatsService.getRequestGroupsStats(getGroupRequestStatsDto);
 
-            CompletableFuture<Report> requestWithRows = reportFutureWithFilters.thenApply(currentReport -> {
-                boolean pagesOut = false;
-                int pageNumber = 0;
-                while (!pagesOut) {
-                    GetGroupRequestStatsDto getGroupRequestStatsDto = GetGroupRequestStatsDto.builder()
-                            .requestFilter(requestDto.getFilter())
-                            .page(pageNumber++)
-                            .build();
+            List<ReportRow> pageReportRows = reportRowMapper.toReportRows(pageOfGroupRequestStats.getContent(), report);
+            report.addRows(pageReportRows);
+            report = reportDao.save(report);
 
-                    Page<GroupRequestStatDto> pageOfGroupRequestStats = groupRequestStatsService.getRequestGroupsStats(getGroupRequestStatsDto);
-
-                    List<ReportRow> pageReportRows = reportRowMapper.toReportRows(pageOfGroupRequestStats.getContent(), currentReport);
-                    currentReport.addRows(pageReportRows);
-                    currentReport = reportDao.save(currentReport);
-
-                    pagesOut = pageOfGroupRequestStats.getTotalPages() >= pageNumber;
-                }
-
-                return currentReport;
-            });
-
-            return requestWithRows.thenApply(currentReport -> {
-                currentReport.setFinishedAt(LocalDateTime.now());
-                currentReport.setStatus(ReportStatus.COMPLETED);
-                currentReport = reportDao.save(currentReport);
-                return reportMapper.toReportDto(currentReport);
-            });
-
-        } catch (Exception e) {
-            reportFuture.completeExceptionally(e);
-            reportFuture.thenAccept(currentReport -> {
-                currentReport.setStatus(ReportStatus.FAILED);
-                reportDao.save(currentReport);
-            });
+            pagesOut = pageNumber >= pageOfGroupRequestStats.getTotalPages();
         }
 
-        return reportFuture.thenApply(reportMapper::toReportDto);
+        return report;
+    }
+
+    private ReportDto finalizeReport(Report report) {
+        report.setFinishedAt(LocalDateTime.now());
+        report.setStatus(ReportStatus.COMPLETED);
+        return reportMapper.toReportDto(reportDao.save(report));
+    }
+
+    private RuntimeException unwrapCompletionException(Throwable e) {
+        Throwable cause = e instanceof CompletionException ? e.getCause() : e;
+        return cause instanceof RuntimeException ?
+                (RuntimeException) cause : new CompletionException(cause);
     }
 }

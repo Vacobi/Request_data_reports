@@ -8,6 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class RequestFilterTestAsserts {
 
     public static void assertRequestFilterEquals(RequestFilter expected, RequestFilter actual) {
+        if (expected == null && actual == null) {
+            return;
+        }
+
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getFromDate(), actual.getFromDate());
         assertEquals(expected.getToDate(), actual.getToDate());

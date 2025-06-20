@@ -20,10 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import static axi.practice.data_generation_reports.util.ReportAsserts.assertReportDtoEquals;
 import static axi.practice.data_generation_reports.util.ReportAsserts.assertReportEquals;
@@ -33,6 +35,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ContextConfiguration(initializers = TestContainersConfig.class)
 class ReportServiceTest extends ClearableTest {
+
+    @Autowired
+    private int dataPageSize;
 
     @Autowired
     private ReportService reportService;
@@ -147,6 +152,76 @@ class ReportServiceTest extends ClearableTest {
         assertBothNotNull(actualDto.getCreatedAt(), actualDto.getFinishedAt());
         assertReportEquals(expectedReport, actualReport);
         assertBothNotNull(actualReport.getCreatedAt(), actualReport.getFinishedAt());
+        assertEquals(countReportsBeforeRequest + 1, countReportsAfterRequest);
+        assertEquals(countReportRowsBeforeRequest + rowsCount, countReportRowsAfterRequest);
+    }
+
+    @Test
+    void reportFailed() {
+
+        int rowsCount = 1;
+        CreateRequestFilterRequestDto requestFilterRequestDto = CreateRequestFilterRequestDto.builder()
+                .fromDate(LocalDateTime.of(2025, 1, 1, 0, 0))
+                .toDate(LocalDateTime.of(2020, 1, 1, 0, 0))
+                .build();
+        CreateReportRequestDto requestDto = CreateReportRequestDto.builder()
+                .filter(requestFilterRequestDto)
+                .build();
+
+        List<CreateRequestDto> createRequests = createRequestDtos(rowsCount);
+        createRequests.forEach(createRequestDto -> requestService.create(createRequestDto));
+
+
+        long countReportsBeforeRequest = reportDao.count();
+        long countReportRowsBeforeRequest = reportRowDao.count();
+
+        CompletableFuture<ReportDto> actualFuture = reportService.generateReport(requestDto);
+        assertThrows(CompletionException.class, actualFuture::join);
+
+        long countReportsAfterRequest = reportDao.count();
+        long countReportRowsAfterRequest = reportRowDao.count();
+
+        Optional<Report> optionalActualReport = reportDao.findLastWithRows();
+        Report actualReport = optionalActualReport.get();
+
+
+        Report expectedReport = Report.builder()
+                .id(actualReport.getId())
+                .status(ReportStatus.FAILED)
+                .createdAt(actualReport.getCreatedAt())
+                .finishedAt(actualReport.getFinishedAt())
+                .build();
+
+
+        assertEquals(countReportsBeforeRequest + 1, countReportsAfterRequest);
+        assertEquals(countReportRowsBeforeRequest, countReportRowsAfterRequest);
+        assertReportEquals(expectedReport, actualReport);
+        assertBothNotNull(actualReport.getCreatedAt(), actualReport.getFinishedAt());
+    }
+
+    @Test
+    void getReportWithSeveralPages() {
+
+        int rowsCount = (int) (dataPageSize * 1.5);
+        CreateRequestFilterRequestDto requestFilterRequestDto = CreateRequestFilterRequestDto.builder().build();
+        CreateReportRequestDto requestDto = CreateReportRequestDto.builder()
+                .filter(requestFilterRequestDto)
+                .build();
+
+        List<CreateRequestDto> createRequests = createRequestDtos(rowsCount);
+        createRequests.forEach(createRequestDto -> requestService.create(createRequestDto));
+
+
+        long countReportsBeforeRequest = reportDao.count();
+        long countReportRowsBeforeRequest = reportRowDao.count();
+
+        CompletableFuture<ReportDto> actualFuture = reportService.generateReport(requestDto);
+        actualFuture.join();
+
+        long countReportsAfterRequest = reportDao.count();
+        long countReportRowsAfterRequest = reportRowDao.count();
+
+
         assertEquals(countReportsBeforeRequest + 1, countReportsAfterRequest);
         assertEquals(countReportRowsBeforeRequest + rowsCount, countReportRowsAfterRequest);
     }

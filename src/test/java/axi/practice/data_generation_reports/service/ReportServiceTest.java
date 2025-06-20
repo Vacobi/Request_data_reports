@@ -2,6 +2,7 @@ package axi.practice.data_generation_reports.service;
 
 import axi.practice.data_generation_reports.config.TestContainersConfig;
 import axi.practice.data_generation_reports.dao.ReportDao;
+import axi.practice.data_generation_reports.dao.ReportRowDao;
 import axi.practice.data_generation_reports.dto.filter.CreateRequestFilterRequestDto;
 import axi.practice.data_generation_reports.dto.filter.RequestFilterDto;
 import axi.practice.data_generation_reports.dto.report.CreateReportRequestDto;
@@ -27,6 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import static axi.practice.data_generation_reports.util.ReportAsserts.assertReportDtoEquals;
 import static axi.practice.data_generation_reports.util.ReportAsserts.assertReportEquals;
 import static axi.practice.data_generation_reports.util.TestAsserts.assertBothNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ContextConfiguration(initializers = TestContainersConfig.class)
@@ -40,6 +42,8 @@ class ReportServiceTest extends ClearableTest {
 
     @Autowired
     private ReportDao reportDao;
+    @Autowired
+    private ReportRowDao reportRowDao;
 
     @Autowired
     private ReportMapper reportMapper;
@@ -75,8 +79,14 @@ class ReportServiceTest extends ClearableTest {
         createRequests.forEach(createRequestDto -> requestService.create(createRequestDto));
 
 
+        long countReportsBeforeRequest = reportDao.count();
+        long countReportRowsBeforeRequest = reportRowDao.count();
+
         CompletableFuture<ReportDto> actualFuture = reportService.generateReport(requestDto);
         ReportDto actualDto = actualFuture.join();
+
+        long countReportsAfterRequest = reportDao.count();
+        long countReportRowsAfterRequest = reportRowDao.count();
 
         Optional<Report> optionalActualReport = reportDao.findByIdWithRows(actualDto.getId());
         Report actualReport = optionalActualReport.get();
@@ -137,5 +147,7 @@ class ReportServiceTest extends ClearableTest {
         assertBothNotNull(actualDto.getCreatedAt(), actualDto.getFinishedAt());
         assertReportEquals(expectedReport, actualReport);
         assertBothNotNull(actualReport.getCreatedAt(), actualReport.getFinishedAt());
+        assertEquals(countReportsBeforeRequest + 1, countReportsAfterRequest);
+        assertEquals(countReportRowsBeforeRequest + rowsCount, countReportRowsAfterRequest);
     }
 }

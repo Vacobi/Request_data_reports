@@ -13,4 +13,7 @@ public interface ReportDao extends JpaRepository<Report, Long> {
 
     @Query("SELECT r FROM Report r LEFT JOIN FETCH r.rows WHERE r.id = :id")
     Optional<Report> findByIdWithRows(@Param("id") Long id);
+
+    @Query("SELECT r FROM Report r LEFT JOIN FETCH r.rows WHERE r.id = (SELECT MAX(r2.id) FROM Report r2)")
+    Optional<Report> findLastWithRows();
 }

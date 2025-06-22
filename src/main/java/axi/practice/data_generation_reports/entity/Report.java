@@ -23,7 +23,7 @@ public class Report {
     @Column(name="id", nullable = false)
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="filter_id")
     private RequestFilter filter;
 

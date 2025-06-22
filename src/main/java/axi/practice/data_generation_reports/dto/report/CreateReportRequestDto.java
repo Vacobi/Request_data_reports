@@ -11,5 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class CreateReportRequestDto {
-    private CreateRequestFilterRequestDto filter;
+
+    @Builder.Default
+    private CreateRequestFilterRequestDto filter = CreateRequestFilterRequestDto.builder().build();
 }

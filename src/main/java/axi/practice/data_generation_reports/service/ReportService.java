@@ -12,7 +12,7 @@ import axi.practice.data_generation_reports.entity.Report;
 import axi.practice.data_generation_reports.entity.ReportRow;
 import axi.practice.data_generation_reports.entity.RequestFilter;
 import axi.practice.data_generation_reports.entity.enums.ReportStatus;
-import axi.practice.data_generation_reports.mapper.ReportMapper;
+import axi.practice.data_generation_reports.exception.ReportNotFound;
 import axi.practice.data_generation_reports.mapper.ReportRowMapper;
 import axi.practice.data_generation_reports.mapper.RequestFilterMapper;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -103,5 +104,15 @@ public class ReportService {
         Throwable cause = e instanceof CompletionException ? e.getCause() : e;
         return cause instanceof RuntimeException ?
                 (RuntimeException) cause : new CompletionException(cause);
+    }
+
+    public ReportStatus getStatus(Long reportId) {
+        Optional<ReportStatus> optionalStatus = reportDao.getStatus(reportId);
+
+        if (optionalStatus.isEmpty()) {
+            throw new ReportNotFound(reportId);
+        }
+
+        return optionalStatus.get();
     }
 }

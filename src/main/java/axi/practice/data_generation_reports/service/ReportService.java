@@ -115,4 +115,14 @@ public class ReportService {
 
         return optionalStatus.get();
     }
+
+    public boolean completed(Long reportId) {
+        Optional<ReportStatus> optionalStatus = reportDao.getStatus(reportId);
+
+        if (optionalStatus.isEmpty()) {
+            throw new ReportNotFound(reportId);
+        }
+
+        return optionalStatus.get() == ReportStatus.COMPLETED;
+    }
 }

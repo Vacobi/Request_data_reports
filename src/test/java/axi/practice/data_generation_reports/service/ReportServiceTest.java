@@ -50,9 +50,6 @@ class ReportServiceTest extends ClearableTest {
     @Autowired
     private ReportRowDao reportRowDao;
 
-    @Autowired
-    private ReportMapper reportMapper;
-
     private Long currentRequest = 0L;
     private List<CreateRequestDto> createRequestDtos(int count) {
 

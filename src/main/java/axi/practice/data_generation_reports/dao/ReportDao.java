@@ -1,6 +1,7 @@
 package axi.practice.data_generation_reports.dao;
 
 import axi.practice.data_generation_reports.entity.Report;
+import axi.practice.data_generation_reports.entity.enums.ReportStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +27,7 @@ public interface ReportDao extends JpaRepository<Report, Long> {
             WHERE r.id = (SELECT MAX(r2.id) FROM Report r2
             )""")
     Optional<Report> findLastWithRows();
+
+    @Query("SELECT r.status FROM Report r WHERE r.id = :id")
+    Optional<ReportStatus> getStatus(@Param("id") Long id);
 }

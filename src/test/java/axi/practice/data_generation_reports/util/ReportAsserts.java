@@ -1,6 +1,7 @@
 package axi.practice.data_generation_reports.util;
 
 import axi.practice.data_generation_reports.dto.report.ReportDto;
+import axi.practice.data_generation_reports.dto.report.ReportPageResponseDto;
 import axi.practice.data_generation_reports.dto.report_row.ReportRowDto;
 import axi.practice.data_generation_reports.entity.Report;
 import axi.practice.data_generation_reports.entity.ReportRow;
@@ -13,6 +14,15 @@ import static axi.practice.data_generation_reports.util.TestAsserts.assertLocalD
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReportAsserts {
+
+    public static void assertReportPageDtoEquals(ReportPageResponseDto expected, ReportPageResponseDto actual) {
+        assertEquals(expected.getReportId(), actual.getReportId());
+        assertRequestFilterDtoEquals(expected.getFilter(), actual.getFilter());
+        assertEquals(expected.getStatus(), actual.getStatus());
+        assertLocalDateTimeEquals(expected.getCreatedAt(), actual.getCreatedAt());
+        assertLocalDateTimeEquals(expected.getFinishedAt(), actual.getFinishedAt());
+        assertReportRowsDtoEquals(expected.getRows().getContent(), actual.getRows().getContent());
+    }
 
     public static void assertReportEquals(Report expected, Report actual) {
         assertEquals(expected.getId(), actual.getId());

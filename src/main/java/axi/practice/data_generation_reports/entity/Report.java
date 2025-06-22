@@ -40,6 +40,7 @@ public class Report {
 
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
+    // Здесь сделал список (не множество) на случай, если нужно будет еще сортировать по другим параметрам получившуюся выборку (по хосту по алфавиту, по авг заголовков и тд)
     private List<ReportRow> rows = new LinkedList<>();
 
     public void addRows(List<ReportRow> rows) {

@@ -6,7 +6,8 @@ import axi.practice.data_generation_reports.dto.filter.CreateRequestFilterReques
 import axi.practice.data_generation_reports.dto.group_request_stat.GetGroupRequestStatsDto;
 import axi.practice.data_generation_reports.dto.group_request_stat.GroupRequestStatDto;
 import axi.practice.data_generation_reports.dto.report.CreateReportRequestDto;
-import axi.practice.data_generation_reports.dto.report.ReportDto;
+import axi.practice.data_generation_reports.dto.report.GetReportPageRequestDto;
+import axi.practice.data_generation_reports.dto.report.ReportPageResponseDto;
 import axi.practice.data_generation_reports.dto.report_row.ReportRowDto;
 import axi.practice.data_generation_reports.entity.Report;
 import axi.practice.data_generation_reports.entity.ReportRow;
@@ -15,8 +16,11 @@ import axi.practice.data_generation_reports.entity.enums.ReportStatus;
 import axi.practice.data_generation_reports.exception.ReportNotFound;
 import axi.practice.data_generation_reports.mapper.ReportRowMapper;
 import axi.practice.data_generation_reports.mapper.RequestFilterMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +34,8 @@ import java.util.concurrent.CompletionException;
 @RequiredArgsConstructor
 public class ReportService {
 
+    private final int dataPageSize;
+
     private final RequestFilterMapper requestFilterMapper;
     private final ReportRowMapper reportRowMapper;
 
@@ -37,6 +43,7 @@ public class ReportService {
     private final GroupRequestStatsService groupRequestStatsService;
 
     private final ReportDao reportDao;
+    private final ReportRowDao reportRowDao;
 
     @Async
     public CompletableFuture<Long> generateReport(CreateReportRequestDto requestDto) {
@@ -124,5 +131,28 @@ public class ReportService {
         }
 
         return optionalStatus.get() == ReportStatus.COMPLETED;
+    }
+
+    @Transactional
+    public ReportPageResponseDto getReport(GetReportPageRequestDto requestDto) {
+
+        Optional<Report> optionalReport = reportDao.findById(requestDto.getReportId());
+        if (optionalReport.isEmpty()) {
+            throw new ReportNotFound(requestDto.getReportId());
+        }
+        Report report = optionalReport.get();
+
+        Pageable pageable = PageRequest.of(requestDto.getPage(), dataPageSize);
+        Page<ReportRow> reportRowPage = reportRowDao.findByReport(report, pageable);
+
+        Page<ReportRowDto> reportRowDtoPage = reportRowPage.map(reportRowMapper::toReportRowDto);
+        return ReportPageResponseDto.builder()
+                .reportId(report.getId())
+                .filter(requestFilterMapper.toRequestFilterDto(report.getFilter()))
+                .status(report.getStatus())
+                .createdAt(report.getCreatedAt())
+                .finishedAt(report.getFinishedAt())
+                .rows(reportRowDtoPage)
+                .build();
     }
 }

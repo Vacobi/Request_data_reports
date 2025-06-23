@@ -5,9 +5,7 @@ import axi.practice.data_generation_reports.dao.ReportDao;
 import axi.practice.data_generation_reports.dao.ReportRowDao;
 import axi.practice.data_generation_reports.dto.filter.CreateRequestFilterRequestDto;
 import axi.practice.data_generation_reports.dto.filter.RequestFilterDto;
-import axi.practice.data_generation_reports.dto.report.CreateReportRequestDto;
-import axi.practice.data_generation_reports.dto.report.GetReportPageRequestDto;
-import axi.practice.data_generation_reports.dto.report.ReportPageResponseDto;
+import axi.practice.data_generation_reports.dto.report.*;
 import axi.practice.data_generation_reports.dto.report_row.ReportRowDto;
 import axi.practice.data_generation_reports.dto.request.CreateRequestDto;
 import axi.practice.data_generation_reports.entity.Report;
@@ -78,7 +76,7 @@ class ReportServiceTest extends ClearableTest {
     }
 
     @Nested
-    class generateReport extends ClearableTest {
+    class generateReport {
 
         private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
         private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
@@ -483,7 +481,7 @@ class ReportServiceTest extends ClearableTest {
     }
 
     @Nested
-    class getReport extends ClearableTest{
+    class getReport {
 
         private Long generateAndPersistReport(int rowsCount, CreateRequestFilterRequestDto requestFilterRequestDto) {
 
@@ -545,6 +543,8 @@ class ReportServiceTest extends ClearableTest {
 
             CompletableFuture<Long> actualFuture = reportService.generateReport(createReportRequestDto);
             Long reportId = actualFuture.join();
+            await().atMost(10, TimeUnit.SECONDS)
+                    .until(() -> reportService.getStatus(reportId) == ReportStatus.COMPLETED);
 
             int page = 0;
             GetReportPageRequestDto requestDto = GetReportPageRequestDto.builder()
@@ -607,6 +607,8 @@ class ReportServiceTest extends ClearableTest {
 
             CompletableFuture<Long> actualFuture = reportService.generateReport(createReportRequestDto);
             Long reportId = actualFuture.join();
+            await().atMost(10, TimeUnit.SECONDS)
+                    .until(() -> reportService.getStatus(reportId) == ReportStatus.COMPLETED);
 
             GetReportPageRequestDto requestDto1 = GetReportPageRequestDto.builder()
                     .reportId(reportId)
@@ -711,6 +713,65 @@ class ReportServiceTest extends ClearableTest {
             assertReportRowsDtoEquals(expectedRows, actualRows);
             assertEquals(1, actual.getTotalElements());
             assertEquals(1, actual.getTotalPages());
+        }
+    }
+
+    @Nested
+    class getReports {
+
+        @Test
+        void onePageReport() {
+            CreateRequestFilterRequestDto requestFilterRequestDto = CreateRequestFilterRequestDto.builder().build();
+            CreateReportRequestDto requestDto = CreateReportRequestDto.builder()
+                    .filter(requestFilterRequestDto)
+                    .build();
+
+            List<CreateRequestDto> createRequests = createRequestDtos(1);
+            createRequests.forEach(createRequestDto -> requestService.create(createRequestDto));
+
+            int reportsCount = dataPageSize / 2;
+            for (int i = 0; i < reportsCount; i++) {
+                CompletableFuture<Long> actualFuture = reportService.generateReport(requestDto);
+                Long actualId = actualFuture.join();
+                await().atMost(10, TimeUnit.SECONDS)
+                        .until(() -> reportService.getStatus(actualId) == ReportStatus.COMPLETED);
+            }
+
+            Page<ReportDataDto> actual = reportService.getReports(0);
+
+            assertEquals(reportsCount, actual.getTotalElements());
+        }
+
+        @Test
+        void fewPagesReport() {
+            CreateRequestFilterRequestDto requestFilterRequestDto = CreateRequestFilterRequestDto.builder().build();
+            CreateReportRequestDto requestDto = CreateReportRequestDto.builder()
+                    .filter(requestFilterRequestDto)
+                    .build();
+
+            List<CreateRequestDto> createRequests = createRequestDtos(1);
+            createRequests.forEach(createRequestDto -> requestService.create(createRequestDto));
+
+            int reportsCount = (int) (dataPageSize * 1.5);
+            for (int i = 0; i < reportsCount; i++) {
+                CompletableFuture<Long> actualFuture = reportService.generateReport(requestDto);
+                Long actualId = actualFuture.join();
+                await().atMost(10, TimeUnit.SECONDS)
+                        .until(() -> reportService.getStatus(actualId) == ReportStatus.COMPLETED);
+            }
+
+            Page<ReportDataDto> actual = reportService.getReports(0);
+
+            assertEquals(reportsCount, actual.getTotalElements());
+        }
+
+        @Test
+        void zeroReports() {
+            int reportsCount = 0;
+
+            Page<ReportDataDto> actual = reportService.getReports(0);
+
+            assertEquals(reportsCount, actual.getTotalElements());
         }
     }
 }

@@ -7,6 +7,7 @@ import axi.practice.data_generation_reports.dto.group_request_stat.GetGroupReque
 import axi.practice.data_generation_reports.dto.group_request_stat.GroupRequestStatDto;
 import axi.practice.data_generation_reports.dto.report.CreateReportRequestDto;
 import axi.practice.data_generation_reports.dto.report.GetReportPageRequestDto;
+import axi.practice.data_generation_reports.dto.report.ReportDataDto;
 import axi.practice.data_generation_reports.dto.report.ReportPageResponseDto;
 import axi.practice.data_generation_reports.dto.report_row.ReportRowDto;
 import axi.practice.data_generation_reports.entity.Report;
@@ -14,6 +15,7 @@ import axi.practice.data_generation_reports.entity.ReportRow;
 import axi.practice.data_generation_reports.entity.RequestFilter;
 import axi.practice.data_generation_reports.entity.enums.ReportStatus;
 import axi.practice.data_generation_reports.exception.ReportNotFound;
+import axi.practice.data_generation_reports.mapper.ReportMapper;
 import axi.practice.data_generation_reports.mapper.ReportRowMapper;
 import axi.practice.data_generation_reports.mapper.RequestFilterMapper;
 import jakarta.transaction.Transactional;
@@ -44,6 +46,7 @@ public class ReportService {
 
     private final ReportDao reportDao;
     private final ReportRowDao reportRowDao;
+    private final ReportMapper reportMapper;
 
     @Async
     public CompletableFuture<Long> generateReport(CreateReportRequestDto requestDto) {
@@ -154,5 +157,14 @@ public class ReportService {
                 .finishedAt(report.getFinishedAt())
                 .rows(reportRowDtoPage)
                 .build();
+    }
+
+    @Transactional
+    public Page<ReportDataDto> getReports(int page) {
+        Pageable pageable = PageRequest.of(page, dataPageSize);
+
+        Page<Report> reportPage = reportDao.findAll(pageable);
+
+        return reportPage.map(reportMapper::toReportDataDto);
     }
 }

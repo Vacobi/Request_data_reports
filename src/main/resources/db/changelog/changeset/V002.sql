@@ -26,12 +26,12 @@ request_stats AS (
 SELECT
     gen_random_uuid() as id,
     rs.host,
-    rs.path,
+    COALESCE(rs.path, '') AS path,
     AVG(rs.header_count) AS avg_headers,
     AVG(rs.param_count) AS avg_params
 FROM request_stats rs
 JOIN filter f ON TRUE
-GROUP BY rs.host, rs.path
+GROUP BY rs.host, COALESCE(rs.path, '')
 HAVING
     (MAX(f.avg_headers) IS NULL OR ROUND(AVG(rs.header_count), 2) = ROUND(MAX(f.avg_headers), 2)) AND
     (MAX(f.avg_query_params) IS NULL OR ROUND(AVG(rs.param_count), 2) = ROUND(MAX(f.avg_query_params), 2));

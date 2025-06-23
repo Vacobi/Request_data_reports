@@ -18,7 +18,7 @@ public class ReportController {
     public GenerateReportResponseDto generateReport(
             @RequestBody CreateReportRequestDto requestDto
     ) {
-        Long reportId = reportService.generateReport(requestDto).join();
+        Long reportId = reportService.generateReport(requestDto);
 
         return GenerateReportResponseDto.builder()
                 .reportId(reportId)

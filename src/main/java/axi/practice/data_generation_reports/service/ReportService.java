@@ -49,7 +49,7 @@ public class ReportService {
     private final ReportMapper reportMapper;
 
     @Async
-    public CompletableFuture<Long> generateReport(CreateReportRequestDto requestDto) {
+    public Long generateReport(CreateReportRequestDto requestDto) {
         final Report initialReport = reportDao.save(
                 Report.builder().status(ReportStatus.PENDING).build()
         );
@@ -66,7 +66,7 @@ public class ReportService {
                     return finalizeReport(report);
                 });
 
-        return CompletableFuture.completedFuture(initialReport.getId());
+        return initialReport.getId();
     }
 
     private Report updateStatus(Report report, ReportStatus status) {

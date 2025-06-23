@@ -100,8 +100,7 @@ class ReportServiceTest extends ClearableTest {
             long countReportsBeforeRequest = reportDao.count();
             long countReportRowsBeforeRequest = reportRowDao.count();
 
-            CompletableFuture<Long> actualFuture = reportService.generateReport(requestDto);
-            Long actualId = actualFuture.join();
+            Long actualId = reportService.generateReport(requestDto);
             await().atMost(10, TimeUnit.SECONDS)
                     .until(() -> reportService.getStatus(actualId) == ReportStatus.COMPLETED);
 
@@ -164,8 +163,7 @@ class ReportServiceTest extends ClearableTest {
             long countReportsBeforeRequest = reportDao.count();
             long countReportRowsBeforeRequest = reportRowDao.count();
 
-            CompletableFuture<Long> actualFuture = reportService.generateReport(requestDto);
-            actualFuture.join();
+            reportService.generateReport(requestDto);
 
             long countReportsAfterRequest = reportDao.count();
             long countReportRowsAfterRequest = reportRowDao.count();
@@ -205,8 +203,7 @@ class ReportServiceTest extends ClearableTest {
             long countReportsBeforeRequest = reportDao.count();
             long countReportRowsBeforeRequest = reportRowDao.count();
 
-            CompletableFuture<Long> actualFuture = reportService.generateReport(requestDto);
-            Long actualId = actualFuture.join();
+            Long actualId = reportService.generateReport(requestDto);
             await().atMost(10, TimeUnit.SECONDS)
                     .until(() -> reportService.getStatus(actualId) == ReportStatus.COMPLETED);
 
@@ -235,8 +232,7 @@ class ReportServiceTest extends ClearableTest {
             long countReportsBeforeRequest = reportDao.count();
             long countReportRowsBeforeRequest = reportRowDao.count();
 
-            CompletableFuture<Long> actualFuture = reportService.generateReport(requestDto);
-            Long actualId = actualFuture.join();
+            Long actualId = reportService.generateReport(requestDto);
             await().atMost(10, TimeUnit.SECONDS)
                     .until(() -> reportService.getStatus(actualId) == ReportStatus.COMPLETED);
 
@@ -303,17 +299,17 @@ class ReportServiceTest extends ClearableTest {
             long countReportsBeforeRequest = reportDao.count();
             long countReportRowsBeforeRequest = reportRowDao.count();
 
-            CompletableFuture<CompletableFuture<Long>> futureReport1 = CompletableFuture.supplyAsync(
+            CompletableFuture<Long> futureReport1 = CompletableFuture.supplyAsync(
                     () -> reportService.generateReport(requestDto1), executors);
 
-            CompletableFuture<CompletableFuture<Long>> futureReport2 = CompletableFuture.supplyAsync(
+            CompletableFuture<Long> futureReport2 = CompletableFuture.supplyAsync(
                     () -> reportService.generateReport(requestDto2), executors);
 
             CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(futureReport1, futureReport2);
             combinedFuture.join();
 
-            Long actualIdReport1 = futureReport1.join().join();
-            Long actualIdReport2 = futureReport2.join().join();
+            Long actualIdReport1 = futureReport1.join();
+            Long actualIdReport2 = futureReport2.join();
 
             await().atMost(10, TimeUnit.SECONDS).until(() ->
                     reportService.getStatus(actualIdReport1) == ReportStatus.COMPLETED &&
@@ -464,9 +460,7 @@ class ReportServiceTest extends ClearableTest {
             List<CreateRequestDto> createRequests = createRequestDtos(rowsCount);
             createRequests.forEach(createRequestDto -> requestService.create(createRequestDto));
 
-            CompletableFuture<Long> actualFuture = reportService.generateReport(requestDto);
-
-            return actualFuture.join();
+            return reportService.generateReport(requestDto);
         }
 
         @Test
@@ -513,8 +507,7 @@ class ReportServiceTest extends ClearableTest {
                     .filter(requestFilterRequestDto)
                     .build();
 
-            CompletableFuture<Long> actualFuture = reportService.generateReport(createReportRequestDto);
-            Long reportId = actualFuture.join();
+            Long reportId = reportService.generateReport(createReportRequestDto);
             await().atMost(10, TimeUnit.SECONDS)
                     .until(() -> reportService.getStatus(reportId) == ReportStatus.COMPLETED);
 
@@ -577,8 +570,7 @@ class ReportServiceTest extends ClearableTest {
                     .filter(requestFilterRequestDto)
                     .build();
 
-            CompletableFuture<Long> actualFuture = reportService.generateReport(createReportRequestDto);
-            Long reportId = actualFuture.join();
+            Long reportId = reportService.generateReport(createReportRequestDto);
             await().atMost(10, TimeUnit.SECONDS)
                     .until(() -> reportService.getStatus(reportId) == ReportStatus.COMPLETED);
 
@@ -654,8 +646,7 @@ class ReportServiceTest extends ClearableTest {
                     .filter(requestFilterRequestDto)
                     .build();
 
-            CompletableFuture<Long> actualFuture = reportService.generateReport(createReportRequestDto);
-            Long reportId = actualFuture.join();
+            Long reportId = reportService.generateReport(createReportRequestDto);
             await().atMost(10, TimeUnit.SECONDS)
                     .until(() -> reportService.getStatus(reportId) == ReportStatus.COMPLETED);
 
@@ -703,10 +694,9 @@ class ReportServiceTest extends ClearableTest {
 
             int reportsCount = dataPageSize / 2;
             for (int i = 0; i < reportsCount; i++) {
-                CompletableFuture<Long> actualFuture = reportService.generateReport(requestDto);
-                Long actualId = actualFuture.join();
+                Long reportId = reportService.generateReport(requestDto);
                 await().atMost(10, TimeUnit.SECONDS)
-                        .until(() -> reportService.getStatus(actualId) == ReportStatus.COMPLETED);
+                        .until(() -> reportService.getStatus(reportId) == ReportStatus.COMPLETED);
             }
 
             Page<ReportDataDto> actual = reportService.getReports(0);
@@ -726,10 +716,9 @@ class ReportServiceTest extends ClearableTest {
 
             int reportsCount = (int) (dataPageSize * 1.5);
             for (int i = 0; i < reportsCount; i++) {
-                CompletableFuture<Long> actualFuture = reportService.generateReport(requestDto);
-                Long actualId = actualFuture.join();
+                Long reportId = reportService.generateReport(requestDto);
                 await().atMost(10, TimeUnit.SECONDS)
-                        .until(() -> reportService.getStatus(actualId) == ReportStatus.COMPLETED);
+                        .until(() -> reportService.getStatus(reportId) == ReportStatus.COMPLETED);
             }
 
             Page<ReportDataDto> actual = reportService.getReports(0);

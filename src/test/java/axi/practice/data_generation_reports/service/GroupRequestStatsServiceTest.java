@@ -161,6 +161,42 @@ class GroupRequestStatsServiceTest extends ClearableTest {
     }
 
     @Test
+    void getGroupRequestStatsWithEmptyPath() {
+
+        String host = "google.com";
+        CreateRequestDto requestDto = CreateRequestDto.builder()
+                .url(host)
+                .build();
+
+        requestService.create(requestDto);
+
+        CreateRequestFilterRequestDto filter = CreateRequestFilterRequestDto.builder()
+                .build();
+
+        GetGroupRequestStatsDto getGroupRequestStatsDto = GetGroupRequestStatsDto.builder()
+                .page(0)
+                .requestFilter(filter)
+                .build();
+
+        Page<GroupRequestStatDto> actualPage = groupRequestStatsService.getRequestGroupsStats(getGroupRequestStatsDto);
+
+        assertEquals(1, actualPage.getTotalElements());
+
+        double expectedAvgHeaders = 0.0;
+        double expectedAvgQueryParams = 0.0;
+        GroupRequestStatDto actualDto = actualPage.get().iterator().next();
+        GroupRequestStatDto expectedDto = GroupRequestStatDto.builder()
+                .id(actualDto.getId())
+                .host(host)
+                .path("")
+                .avgHeaders(expectedAvgHeaders)
+                .avgQueryParams(expectedAvgQueryParams)
+                .build();
+
+        assertGroupRequestStatsDtoEquals(expectedDto, actualDto);
+    }
+
+    @Test
     void fewRecordsWithSameHostAndPath() {
 
         String host = "google.com";
@@ -710,7 +746,7 @@ class GroupRequestStatsServiceTest extends ClearableTest {
         GroupRequestStatDto expectedDto = GroupRequestStatDto.builder()
                 .id(actualDto.getId())
                 .host(host)
-                .path(null)
+                .path("")
                 .avgHeaders(expectedAvgHeaders)
                 .avgQueryParams(expectedAvgQueryParams)
                 .build();

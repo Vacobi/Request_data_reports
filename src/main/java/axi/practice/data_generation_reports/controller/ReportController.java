@@ -2,9 +2,12 @@ package axi.practice.data_generation_reports.controller;
 
 import axi.practice.data_generation_reports.dto.report.*;
 import axi.practice.data_generation_reports.service.ReportService;
+import axi.practice.data_generation_reports.service.file_service.CsvFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.File;
 
 
 @RestController
@@ -13,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 public class ReportController {
 
     private final ReportService reportService;
+
+    private final CsvFileService csvFileService;
 
     @PostMapping
     public GenerateReportResponseDto generateReport(
@@ -57,5 +62,10 @@ public class ReportController {
     @GetMapping
     public Page<ReportDataDto> getReports(@RequestParam(defaultValue = "0") int page) {
         return reportService.getReports(page);
+    }
+
+    @GetMapping("/file/{reportId}")
+    public File getReportCsvFile(@PathVariable("reportId") Long reportId) {
+        return csvFileService.getReportFile(reportId);
     }
 }

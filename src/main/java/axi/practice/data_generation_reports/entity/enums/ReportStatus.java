@@ -4,5 +4,9 @@ public enum ReportStatus {
     PENDING,
     PROCESSING,
     COMPLETED,
-    FAILED
+    FAILED;
+
+    public static boolean isFinalState(ReportStatus status) {
+        return status == COMPLETED || status == FAILED;
+    }
 }

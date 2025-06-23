@@ -3,6 +3,7 @@ package axi.practice.data_generation_reports.controller;
 import axi.practice.data_generation_reports.dto.report.*;
 import axi.practice.data_generation_reports.service.ReportService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -51,5 +52,10 @@ public class ReportController {
                 .build();
 
         return reportService.getReport(request);
+    }
+
+    @GetMapping
+    public Page<ReportDataDto> getReports(@RequestParam(defaultValue = "0") int page) {
+        return reportService.getReports(page);
     }
 }

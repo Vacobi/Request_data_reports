@@ -387,34 +387,6 @@ class ReportServiceTest extends ClearableTest {
             assertEquals(countReportsBeforeRequest + 2, countReportsAfterRequest);
             assertEquals(countReportRowsBeforeRequest + 2, countReportRowsAfterRequest);
         }
-
-        private Report buildExpectedReport(Report actualReport, CreateRequestDto request, ReportRow row) {
-            List<ReportRow> expectedRows = List.of(
-                    ReportRow.builder()
-                            .id(row.getId())
-                            .rowUUID(row.getRowUUID())
-                            .host(request.getUrl())
-                            .path(request.getPath())
-                            .avgHeaders(0.0)
-                            .avgQueryParams(0.0)
-                            .report(actualReport)
-                            .build()
-            );
-
-            RequestFilter expectedFilter = RequestFilter.builder()
-                    .id(actualReport.getFilter().getId())
-                    .host(request.getUrl())
-                    .build();
-
-            return Report.builder()
-                    .id(actualReport.getId())
-                    .filter(expectedFilter)
-                    .status(ReportStatus.COMPLETED)
-                    .createdAt(actualReport.getCreatedAt())
-                    .finishedAt(actualReport.getFinishedAt())
-                    .rows(expectedRows)
-                    .build();
-        }
     }
 
     @Nested

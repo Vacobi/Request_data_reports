@@ -18,7 +18,8 @@ public enum ClientExceptionName {
 
     CAN_NOT_CREATE_DIRECTORY(400),
     CAN_NOT_CREATE_FILE(401),
-    REPORT_FILE_ALREADY_EXISTS(402);
+    REPORT_FILE_ALREADY_EXISTS(402),
+    REPORT_FILE_NOT_FOUND(403);
 
     private final int apiErrorCode;
 

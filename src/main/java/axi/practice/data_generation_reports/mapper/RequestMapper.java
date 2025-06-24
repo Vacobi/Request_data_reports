@@ -11,7 +11,8 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(
         componentModel = "spring",
         injectionStrategy = InjectionStrategy.FIELD,
-        unmappedSourcePolicy = ReportingPolicy.IGNORE
+        unmappedSourcePolicy = ReportingPolicy.IGNORE,
+        uses = {HeaderMapper.class, QueryParamMapper.class}
 )
 public interface RequestMapper {
 

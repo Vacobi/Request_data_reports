@@ -11,7 +11,7 @@ import org.mapstruct.ReportingPolicy;
         componentModel = "spring",
         injectionStrategy = InjectionStrategy.FIELD,
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
-        uses = {ReportRowMapper.class}
+        uses = {ReportRowMapper.class, ReportFileMapper.class}
 )
 public interface ReportMapper {
 

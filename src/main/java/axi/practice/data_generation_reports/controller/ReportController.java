@@ -70,4 +70,9 @@ public class ReportController {
             ) {
         return csvFileService.createReportFile(reportId, storageType);
     }
+
+    @GetMapping("/file/{reportId}")
+    public ReportFileDto getReportFile(@PathVariable("reportId") Long reportId) {
+        return csvFileService.getReportFile(reportId);
+    }
 }

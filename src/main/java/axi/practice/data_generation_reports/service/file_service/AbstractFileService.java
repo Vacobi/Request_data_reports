@@ -50,7 +50,9 @@ public abstract class AbstractFileService {
 
         linkReportToFile(report.getId(), reportFile);
 
-        ReportFile persisted = reportFileDao.findByReport_Id(reportId);
+        // Нужно, чтобы получить id записи (тк в Report каскадное сохранение)
+        // get без проверки потому что, по логике, он там должен быть
+        ReportFile persisted = reportFileDao.findByReport_Id(reportId).get();
 
         return reportFileMapper.toReportFileDto(persisted);
     }

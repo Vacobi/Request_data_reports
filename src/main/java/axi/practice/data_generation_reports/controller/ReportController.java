@@ -64,7 +64,7 @@ public class ReportController {
     }
 
     @GetMapping("/file/{reportId}")
-    public ReportFileDto getReportCsvFile(
+    public ReportFileDto generateReportCsvFile(
             @PathVariable("reportId") Long reportId,
             @RequestParam(defaultValue = "DISK") StorageType storageType
             ) {

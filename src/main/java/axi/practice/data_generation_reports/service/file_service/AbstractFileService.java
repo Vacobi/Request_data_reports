@@ -34,6 +34,17 @@ public abstract class AbstractFileService {
 
 
     @Transactional
+    public ReportFileDto getReportFile(Long reportId) {
+        Optional<ReportFile> optionalReportFile = reportFileDao.findByReport_Id(reportId);
+
+        if (optionalReportFile.isEmpty()) {
+            throw new ReportFileNotFound(reportId);
+        }
+
+        return reportFileMapper.toReportFileDto(optionalReportFile.get());
+    }
+
+    @Transactional
     public ReportFileDto createReportFile(Long reportId, StorageType storageType) {
 
         Report rawReport = getRawReport(reportId);

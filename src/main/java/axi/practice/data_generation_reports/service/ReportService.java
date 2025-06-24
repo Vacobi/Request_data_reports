@@ -5,12 +5,10 @@ import axi.practice.data_generation_reports.dao.ReportRowDao;
 import axi.practice.data_generation_reports.dto.filter.CreateRequestFilterRequestDto;
 import axi.practice.data_generation_reports.dto.group_request_stat.GetGroupRequestStatsDto;
 import axi.practice.data_generation_reports.dto.group_request_stat.GroupRequestStatDto;
-import axi.practice.data_generation_reports.dto.report.CreateReportRequestDto;
-import axi.practice.data_generation_reports.dto.report.GetReportPageRequestDto;
-import axi.practice.data_generation_reports.dto.report.ReportDataDto;
-import axi.practice.data_generation_reports.dto.report.ReportPageResponseDto;
+import axi.practice.data_generation_reports.dto.report.*;
 import axi.practice.data_generation_reports.dto.report_row.ReportRowDto;
 import axi.practice.data_generation_reports.entity.Report;
+import axi.practice.data_generation_reports.entity.ReportFile;
 import axi.practice.data_generation_reports.entity.ReportRow;
 import axi.practice.data_generation_reports.entity.RequestFilter;
 import axi.practice.data_generation_reports.entity.enums.ReportStatus;
@@ -48,7 +46,7 @@ public class ReportService {
     private final ReportRowDao reportRowDao;
     private final ReportMapper reportMapper;
 
-    @Async
+
     public Long generateReport(CreateReportRequestDto requestDto) {
         final Report initialReport = reportDao.save(
                 Report.builder().status(ReportStatus.PENDING).build()
@@ -166,5 +164,18 @@ public class ReportService {
         Page<Report> reportPage = reportDao.findAll(pageable);
 
         return reportPage.map(reportMapper::toReportDataDto);
+    }
+
+    @Transactional
+    public ReportDto addReportFileToReport(Long reportId, ReportFile reportFile) {
+        Optional<Report> optionalReport = reportDao.findById(reportId);
+        if (optionalReport.isEmpty()) {
+            throw new ReportNotFound(reportId);
+        }
+        Report report = optionalReport.get();
+
+        report.setReportFile(reportFile);
+
+        return reportMapper.toReportDto(reportDao.save(report));
     }
 }

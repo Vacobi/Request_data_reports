@@ -735,4 +735,56 @@ class ReportServiceTest extends ClearableTest {
             assertEquals(reportsCount, actual.getTotalElements());
         }
     }
+
+    @Nested
+    class getReportTest {
+
+        private List<CreateReportRequestDto> generateReport(int count) {
+            CreateRequestFilterRequestDto requestFilterRequestDto = CreateRequestFilterRequestDto.builder().build();
+
+            List<CreateReportRequestDto> reports = new LinkedList<>();
+            for (int i = 0; i < count; i++) {
+                reports.add(
+                        CreateReportRequestDto.builder()
+                            .filter(requestFilterRequestDto)
+                            .build()
+                );
+            }
+
+            return reports;
+        }
+
+        @Test
+        void getOnePageReport() {
+
+            int count = dataPageSize / 2;
+            List<CreateReportRequestDto> reportsCreateRequests = generateReport(count);
+            reportsCreateRequests.forEach(request -> reportService.generateReport(request));
+
+            Page<ReportDataDto> reports = reportService.getReports(0);
+
+            assertEquals(count, reports.getTotalElements());
+        }
+
+        @Test
+        void fewPagesReport() {
+
+            int count = (int) (dataPageSize * 1.5);
+            List<CreateReportRequestDto> reportsCreateRequests = generateReport(count);
+            reportsCreateRequests.forEach(request -> reportService.generateReport(request));
+
+            Page<ReportDataDto> reports = reportService.getReports(0);
+
+            assertEquals(count, reports.getTotalElements());
+        }
+
+        @Test
+        void zeroReports() {
+            int count = 0;
+
+            Page<ReportDataDto> reports = reportService.getReports(0);
+
+            assertEquals(count, reports.getTotalElements());
+        }
+    }
 }

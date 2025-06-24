@@ -1,14 +1,13 @@
 package axi.practice.data_generation_reports.controller;
 
 import axi.practice.data_generation_reports.dto.report.*;
+import axi.practice.data_generation_reports.dto.report_file.ReportFileDto;
+import axi.practice.data_generation_reports.entity.enums.StorageType;
 import axi.practice.data_generation_reports.service.ReportService;
 import axi.practice.data_generation_reports.service.file_service.CsvFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.File;
-
 
 @RestController
 @RequestMapping("api/reports")
@@ -65,7 +64,10 @@ public class ReportController {
     }
 
     @GetMapping("/file/{reportId}")
-    public File getReportCsvFile(@PathVariable("reportId") Long reportId) {
-        return csvFileService.getReportFile(reportId);
+    public ReportFileDto getReportCsvFile(
+            @PathVariable("reportId") Long reportId,
+            @RequestParam(defaultValue = "DISK") StorageType storageType
+            ) {
+        return csvFileService.createReportFile(reportId, storageType);
     }
 }

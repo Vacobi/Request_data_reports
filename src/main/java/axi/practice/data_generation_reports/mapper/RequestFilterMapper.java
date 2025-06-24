@@ -19,4 +19,6 @@ public interface RequestFilterMapper {
     RequestFilter toRequestFilter(CreateRequestFilterRequestDto requestDto);
 
     RequestFilterDto toRequestFilterDto(RequestFilter requestFilter);
+
+    RequestFilter toRequestFilter(RequestFilterDto requestFilter);
 }

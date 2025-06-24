@@ -2,6 +2,7 @@ package axi.practice.data_generation_reports.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
@@ -30,6 +31,7 @@ public class Request {
     @Column(name="body")
     private String body;
 
+    @CreationTimestamp
     @Column(name="created_at")
     private LocalDateTime timestamp;
 

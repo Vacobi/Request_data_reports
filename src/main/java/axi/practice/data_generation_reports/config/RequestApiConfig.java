@@ -13,6 +13,9 @@ public class RequestApiConfig {
     @Value("${app.data_page_size}")
     private int dataPageSize;
 
+    @Value("${app.reports.directory}")
+    private String reportsDirectory;
+
     @Bean
     public int maxStringLength() {
         return maxStringLength;
@@ -21,5 +24,10 @@ public class RequestApiConfig {
     @Bean
     public int dataPageSize() {
         return dataPageSize;
+    }
+
+    @Bean
+    public String reportsDirectory() {
+        return reportsDirectory;
     }
 }

@@ -27,6 +27,10 @@ public class Report {
     @JoinColumn(name="filter_id")
     private RequestFilter filter;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name="report_file_id")
+    private ReportFile reportFile;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ReportStatus status;
@@ -57,5 +61,9 @@ public class Report {
                 ", filter=" + (filter != null ? filter.getId() : null) +
                 ", rowsCount=" + (rows != null ? rows.size() : 0) +
                 '}';
+    }
+
+    public boolean stored() {
+        return reportFile != null;
     }
 }

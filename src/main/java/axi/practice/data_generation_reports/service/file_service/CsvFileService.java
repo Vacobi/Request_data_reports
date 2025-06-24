@@ -1,21 +1,20 @@
 package axi.practice.data_generation_reports.service.file_service;
 
 import axi.practice.data_generation_reports.dao.ReportDao;
+import axi.practice.data_generation_reports.dao.ReportFileDao;
 import axi.practice.data_generation_reports.dto.report.GetReportPageRequestDto;
 import axi.practice.data_generation_reports.dto.report_row.ReportRowDto;
 import axi.practice.data_generation_reports.entity.Report;
 import axi.practice.data_generation_reports.entity.RequestFilter;
 import axi.practice.data_generation_reports.entity.enums.ReportStatus;
+import axi.practice.data_generation_reports.mapper.ReportFileMapper;
 import axi.practice.data_generation_reports.service.ReportService;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.util.List;
 
 @Service
@@ -24,17 +23,15 @@ public class CsvFileService extends AbstractFileService {
     public CsvFileService(
             ReportService reportService,
             ReportDao reportDao,
+            ReportFileDao reportFileDao,
+            ReportFileMapper reportFileMapper,
             String reportsDirectory) {
-        super(reportService, reportDao, reportsDirectory);
+        super(reportService, reportDao, reportFileDao, reportFileMapper, reportsDirectory);
     }
 
     @Override
-    protected FileWriter createWriter(File file) throws IOException {
-        return new FileWriter(file);
-    }
-
-    @Override
-    protected void writeReportContent(Writer writer, Report report) throws IOException {
+    protected void generateFileContent(OutputStream outputStream, Report report) throws IOException {
+        Writer writer = new OutputStreamWriter(outputStream);
         CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
 
         writeReportMetadata(csvPrinter, report);
@@ -46,6 +43,9 @@ public class CsvFileService extends AbstractFileService {
             csvPrinter.println();
             writeReportRows(csvPrinter, report);
         }
+
+        csvPrinter.flush();
+        writer.flush();
     }
 
     private void writeReportMetadata(CSVPrinter csvPrinter, Report report) throws IOException {
@@ -114,5 +114,10 @@ public class CsvFileService extends AbstractFileService {
     @Override
     protected String generateReportName(Report report) {
         return "report_" + report.getId() + ".csv";
+    }
+
+    @Override
+    protected String getMimeType() {
+        return "csv";
     }
 }

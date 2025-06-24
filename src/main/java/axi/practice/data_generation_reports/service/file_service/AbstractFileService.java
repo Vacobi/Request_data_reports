@@ -1,60 +1,75 @@
 package axi.practice.data_generation_reports.service.file_service;
 
 import axi.practice.data_generation_reports.dao.ReportDao;
+import axi.practice.data_generation_reports.dao.ReportFileDao;
+import axi.practice.data_generation_reports.dto.report_file.ReportFileDto;
 import axi.practice.data_generation_reports.entity.Report;
+import axi.practice.data_generation_reports.entity.ReportFile;
 import axi.practice.data_generation_reports.entity.enums.ReportStatus;
+import axi.practice.data_generation_reports.entity.enums.StorageType;
 import axi.practice.data_generation_reports.exception.*;
+import axi.practice.data_generation_reports.mapper.ReportFileMapper;
 import axi.practice.data_generation_reports.service.ReportService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 public abstract class AbstractFileService {
     
     protected final ReportService reportService;
-
     protected final ReportDao reportDao;
-
+    private final ReportFileDao reportFileDao;
+    private final ReportFileMapper reportFileMapper;
     private final String reportsDirectory;
 
 
-    protected abstract Writer createWriter(File file) throws IOException;
-
-    protected abstract void writeReportContent(Writer writer, Report report) throws IOException;
+    protected abstract void generateFileContent(OutputStream outputStream, Report report) throws IOException;
 
     protected abstract String generateReportName(Report report);
 
+    protected abstract String getMimeType();
+
 
     @Transactional
-    public File getReportFile(Long reportId) {
+    public ReportFileDto createReportFile(Long reportId, StorageType storageType) {
+
+        Report rawReport = getRawReport(reportId);
+        if (getRawReport(reportId).stored()) {
+            throw new ReportFileAlreadyStored(reportId, rawReport.getReportFile().getId());
+        }
 
         Report report = getValidatedReport(reportId);
+        String fileName = generateReportName(report);
 
-        File file = prepareReportFile(report);
+        byte[] fileContent = generateFileContent(report);
 
-        try (Writer writer = createWriter(file)) {
-            writeReportContent(writer, report);
-            return file;
-        } catch (IOException e) {
-            throw new CanNotGenerateFile(file.getName());
-        }
+        ReportFile reportFile = saveReportFile(report, fileName, fileContent, storageType);
+
+        linkReportToFile(report.getId(), reportFile);
+
+        ReportFile persisted = reportFileDao.findByReport_Id(reportId);
+
+        return reportFileMapper.toReportFileDto(persisted);
     }
 
     private Report getValidatedReport(Long reportId) {
+
+        Report report = getRawReport(reportId);
+        verifyState(report);
+
+        return report;
+    }
+
+    private Report getRawReport(Long reportId) {
         Optional<Report> optionalReport = reportDao.findById(reportId);
         if (optionalReport.isEmpty()) {
             throw new ReportNotFound(reportId);
         }
 
-        Report report = optionalReport.get();
-        verifyState(report);
-
-        return report;
+        return optionalReport.get();
     }
 
     private void verifyState(Report report) {
@@ -63,12 +78,62 @@ public abstract class AbstractFileService {
         }
     }
 
+    private byte[] generateFileContent(Report report) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            generateFileContent(outputStream, report);
+            return outputStream.toByteArray();
+        } catch (IOException e) {
+            throw new CanNotGenerateFile("report_" + report.getId());
+        }
+    }
+
+    private ReportFile saveReportFile(Report report, String fileName, byte[] fileContent, StorageType storageType) {
+        if (storageType == StorageType.DISK) {
+            return saveToDisk(report, fileName, fileContent);
+        }
+
+        return saveToDatabase(report, fileName, fileContent);
+    }
+
+    private void linkReportToFile(Long reportId, ReportFile reportFile) {
+        reportService.addReportFileToReport(reportId, reportFile);
+    }
+
+    private ReportFile saveToDisk(Report report, String fileName, byte[] fileContent) {
+        File file = prepareReportFile(report);
+
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(fileContent);
+        } catch (IOException e) {
+            throw new CanNotGenerateFile("Failed to write file: " + file.getName());
+        }
+
+        return ReportFile.builder()
+                .report(report)
+                .fileName(fileName)
+                .filePath(file.getAbsolutePath())
+                .storageType(StorageType.DISK)
+                .mimeType(getMimeType())
+                .build();
+    }
+
+    private ReportFile saveToDatabase(Report report, String fileName, byte[] fileContent) {
+        return ReportFile.builder()
+                .report(report)
+                .fileName(fileName)
+                .filePath(null)
+                .storageType(StorageType.DATABASE)
+                .mimeType(getMimeType())
+                .fileData(fileContent)
+                .build();
+    }
+
     private File prepareReportFile(Report report) {
         String fileName = generateReportName(report);
         File file = new File(reportsDirectory + fileName);
 
         if (file.exists()) {
-            throw new ReportFileAlreadyExists(report.getId(), file.getAbsolutePath());
+            throw new ReportFileAlreadyStored(file.getAbsolutePath());
         }
 
         createParentDirectory(file);

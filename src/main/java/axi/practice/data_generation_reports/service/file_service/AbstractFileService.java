@@ -2,6 +2,7 @@ package axi.practice.data_generation_reports.service.file_service;
 
 import axi.practice.data_generation_reports.dao.ReportDao;
 import axi.practice.data_generation_reports.dao.ReportFileDao;
+import axi.practice.data_generation_reports.dto.report_file.CreateReportFileRequestDto;
 import axi.practice.data_generation_reports.dto.report_file.ReportFileDto;
 import axi.practice.data_generation_reports.entity.Report;
 import axi.practice.data_generation_reports.entity.ReportFile;
@@ -44,25 +45,25 @@ public abstract class AbstractFileService {
     }
 
     @Transactional
-    public ReportFileDto createReportFile(Long reportId, StorageType storageType) {
+    public ReportFileDto createReportFile(CreateReportFileRequestDto createRequestDto) {
 
-        Report rawReport = getRawReport(reportId);
-        if (getRawReport(reportId).stored()) {
-            throw new ReportFileAlreadyStored(reportId, rawReport.getReportFile().getId());
+        Report rawReport = getRawReport(createRequestDto.getReportId());
+        if (getRawReport(createRequestDto.getReportId()).stored()) {
+            throw new ReportFileAlreadyStored(createRequestDto.getReportId(), rawReport.getReportFiles().stream().findFirst().get().getId());
         }
 
-        Report report = getValidatedReport(reportId);
+        Report report = getValidatedReport(createRequestDto.getReportId());
         String fileName = generateReportName(report);
 
         byte[] fileContent = generateFileContent(report);
 
-        ReportFile reportFile = saveReportFile(report, fileName, fileContent, storageType);
+        ReportFile reportFile = saveReportFile(report, fileName, fileContent, createRequestDto.getStorageType());
 
         linkReportToFile(report.getId(), reportFile);
 
         // Нужно, чтобы получить id записи (тк в Report каскадное сохранение)
         // get без проверки потому что, по логике, он там должен быть
-        ReportFile persisted = reportFileDao.findByReport_Id(reportId).get();
+        ReportFile persisted = reportFileDao.findByMimeTypeAndReport_Id(getMimeType(), createRequestDto.getReportId()).get();
 
         return reportFileMapper.toReportFileDto(persisted);
     }

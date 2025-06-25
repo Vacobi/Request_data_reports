@@ -1,6 +1,7 @@
 package axi.practice.data_generation_reports.controller;
 
 import axi.practice.data_generation_reports.dto.report.*;
+import axi.practice.data_generation_reports.dto.report_file.CreateReportFileRequestDto;
 import axi.practice.data_generation_reports.dto.report_file.ReportFileDto;
 import axi.practice.data_generation_reports.entity.enums.StorageType;
 import axi.practice.data_generation_reports.service.ReportService;
@@ -67,8 +68,11 @@ public class ReportController {
     public ReportFileDto generateReportCsvFile(
             @PathVariable("reportId") Long reportId,
             @RequestParam(defaultValue = "DISK") StorageType storageType
+    public ReportFileDto generateReportFile(
+            @RequestBody CreateReportFileRequestDto requestDto
             ) {
-        return csvFileService.createReportFile(reportId, storageType);
+
+        return csvFileService.createReportFile(requestDto);
     }
 
     @GetMapping("/file/{reportId}")

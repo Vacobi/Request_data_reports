@@ -28,8 +28,6 @@ public abstract class AbstractFileService {
 
     protected abstract void generateFileContent(OutputStream outputStream, Report report) throws IOException;
 
-    protected abstract String generateReportName(Report report);
-
     protected abstract String getMimeType();
 
 
@@ -151,6 +149,10 @@ public abstract class AbstractFileService {
 
         createParentDirectory(file);
         return file;
+    }
+
+    protected String generateReportName(Report report) {
+        return "report_" + report.getId() + "." + getMimeType();
     }
 
     private void createParentDirectory(File file) {

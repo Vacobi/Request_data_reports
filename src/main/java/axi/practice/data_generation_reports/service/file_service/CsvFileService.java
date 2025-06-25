@@ -112,11 +112,6 @@ public class CsvFileService extends AbstractFileService {
     }
 
     @Override
-    protected String generateReportName(Report report) {
-        return "report_" + report.getId() + "." + getMimeType();
-    }
-
-    @Override
     protected String getMimeType() {
         return "csv";
     }

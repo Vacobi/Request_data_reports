@@ -5,10 +5,16 @@ import axi.practice.data_generation_reports.dto.report_file.CreateReportFileRequ
 import axi.practice.data_generation_reports.dto.report_file.ReportFileDto;
 import axi.practice.data_generation_reports.entity.enums.MimeType;
 import axi.practice.data_generation_reports.service.ReportService;
-import axi.practice.data_generation_reports.service.file_service.CsvFileService;
+import axi.practice.data_generation_reports.service.file_service.AbstractFileService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/reports")
@@ -17,7 +23,17 @@ public class ReportController {
 
     private final ReportService reportService;
 
-    private final CsvFileService csvFileService;
+    private final List<AbstractFileService> fileServices;
+    private Map<MimeType, AbstractFileService> fileServiceMap;
+
+    @PostConstruct
+    public void init() {
+        fileServiceMap = fileServices.stream()
+                .collect(Collectors.toMap(
+                        AbstractFileService::getMimeType,
+                        Function.identity()
+                ));
+    }
 
     @PostMapping
     public GenerateReportResponseDto generateReport(
@@ -69,7 +85,7 @@ public class ReportController {
             @RequestBody CreateReportFileRequestDto requestDto
             ) {
 
-        return csvFileService.createReportFile(requestDto);
+        return fileServiceMap.get(requestDto.getMimeType()).createReportFile(requestDto);
     }
 
     @GetMapping("/file/{reportId}")
@@ -77,6 +93,7 @@ public class ReportController {
             @PathVariable("reportId") Long reportId,
             @RequestParam(defaultValue = "CSV") MimeType mimeType
     ) {
-        return csvFileService.getReportFile(reportId);
+
+        return fileServiceMap.get(mimeType).getReportFile(reportId);
     }
 }

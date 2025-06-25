@@ -64,10 +64,7 @@ public class ReportController {
         return reportService.getReports(page);
     }
 
-    @PostMapping("/file/{reportId}")
-    public ReportFileDto generateReportCsvFile(
-            @PathVariable("reportId") Long reportId,
-            @RequestParam(defaultValue = "DISK") StorageType storageType
+    @PostMapping("/file")
     public ReportFileDto generateReportFile(
             @RequestBody CreateReportFileRequestDto requestDto
             ) {

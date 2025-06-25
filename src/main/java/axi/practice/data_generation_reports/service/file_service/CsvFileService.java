@@ -113,7 +113,7 @@ public class CsvFileService extends AbstractFileService {
     }
 
     @Override
-    protected MimeType getMimeType() {
+    public MimeType getMimeType() {
         return MimeType.CSV;
     }
 }

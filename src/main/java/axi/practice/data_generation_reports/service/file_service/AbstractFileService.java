@@ -29,7 +29,7 @@ public abstract class AbstractFileService {
 
     protected abstract void generateFileContent(OutputStream outputStream, Report report) throws IOException;
 
-    protected abstract MimeType getMimeType();
+    public abstract MimeType getMimeType();
 
 
     @Transactional

@@ -2,9 +2,11 @@ package axi.practice.data_generation_reports.service.file_service;
 
 import axi.practice.data_generation_reports.dao.ReportDao;
 import axi.practice.data_generation_reports.dao.ReportFileDao;
+import axi.practice.data_generation_reports.dto.report_file.CreateReportFileRequestDto;
 import axi.practice.data_generation_reports.dto.report_file.ReportFileDto;
 import axi.practice.data_generation_reports.entity.Report;
 import axi.practice.data_generation_reports.entity.ReportFile;
+import axi.practice.data_generation_reports.entity.enums.MimeType;
 import axi.practice.data_generation_reports.entity.enums.ReportStatus;
 import axi.practice.data_generation_reports.entity.enums.StorageType;
 import axi.practice.data_generation_reports.exception.*;
@@ -28,14 +30,12 @@ public abstract class AbstractFileService {
 
     protected abstract void generateFileContent(OutputStream outputStream, Report report) throws IOException;
 
-    protected abstract String generateReportName(Report report);
-
-    protected abstract String getMimeType();
+    public abstract MimeType getMimeType();
 
 
     @Transactional
     public ReportFileDto getReportFile(Long reportId) {
-        Optional<ReportFile> optionalReportFile = reportFileDao.findByReport_Id(reportId);
+        Optional<ReportFile> optionalReportFile = reportFileDao.findByMimeTypeAndReport_Id(getMimeType(), reportId);
 
         if (optionalReportFile.isEmpty()) {
             throw new ReportFileNotFound(reportId);
@@ -45,25 +45,25 @@ public abstract class AbstractFileService {
     }
 
     @Transactional
-    public ReportFileDto createReportFile(Long reportId, StorageType storageType) {
+    public ReportFileDto createReportFile(CreateReportFileRequestDto createRequestDto) {
 
-        Report rawReport = getRawReport(reportId);
-        if (getRawReport(reportId).stored()) {
-            throw new ReportFileAlreadyStored(reportId, rawReport.getReportFile().getId());
+        Optional<ReportFile> sameReportFile = reportFileDao.findByMimeTypeAndReport_Id(createRequestDto.getMimeType(), createRequestDto.getReportId());
+        if (sameReportFile.isPresent()) {
+            throw new ReportFileAlreadyStored(createRequestDto.getReportId(), sameReportFile.get().getId());
         }
 
-        Report report = getValidatedReport(reportId);
+        Report report = getValidatedReport(createRequestDto.getReportId());
         String fileName = generateReportName(report);
 
         byte[] fileContent = generateFileContent(report);
 
-        ReportFile reportFile = saveReportFile(report, fileName, fileContent, storageType);
+        ReportFile reportFile = saveReportFile(report, fileName, fileContent, createRequestDto.getStorageType());
 
         linkReportToFile(report.getId(), reportFile);
 
         // Нужно, чтобы получить id записи (тк в Report каскадное сохранение)
         // get без проверки потому что, по логике, он там должен быть
-        ReportFile persisted = reportFileDao.findByReport_Id(reportId).get();
+        ReportFile persisted = reportFileDao.findByMimeTypeAndReport_Id(getMimeType(), createRequestDto.getReportId()).get();
 
         return reportFileMapper.toReportFileDto(persisted);
     }
@@ -151,6 +151,10 @@ public abstract class AbstractFileService {
 
         createParentDirectory(file);
         return file;
+    }
+
+    protected String generateReportName(Report report) {
+        return "report_" + report.getId() + "." + getMimeType().toString();
     }
 
     private void createParentDirectory(File file) {

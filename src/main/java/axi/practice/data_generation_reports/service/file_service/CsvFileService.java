@@ -6,6 +6,7 @@ import axi.practice.data_generation_reports.dto.report.GetReportPageRequestDto;
 import axi.practice.data_generation_reports.dto.report_row.ReportRowDto;
 import axi.practice.data_generation_reports.entity.Report;
 import axi.practice.data_generation_reports.entity.RequestFilter;
+import axi.practice.data_generation_reports.entity.enums.MimeType;
 import axi.practice.data_generation_reports.entity.enums.ReportStatus;
 import axi.practice.data_generation_reports.mapper.ReportFileMapper;
 import axi.practice.data_generation_reports.service.ReportService;
@@ -112,12 +113,7 @@ public class CsvFileService extends AbstractFileService {
     }
 
     @Override
-    protected String generateReportName(Report report) {
-        return "report_" + report.getId() + ".csv";
-    }
-
-    @Override
-    protected String getMimeType() {
-        return "csv";
+    public MimeType getMimeType() {
+        return MimeType.CSV;
     }
 }

@@ -104,8 +104,9 @@ public class XmlFileService extends AbstractFileService {
             Page<ReportRowDto> page = reportService.getReport(request).getRows();
 
             List<ReportRowDto> rows = page.getContent();
-            rows.forEach(row -> {
+            for (ReportRowDto row : rows) {
                 ObjectNode rowNode = rowsArray.addObject();
+
                 rowNode.put("rowUUID", row.getRowUUID().toString());
                 rowNode.put("host", row.getHost());
                 if (row.getPath() != null) {
@@ -113,7 +114,7 @@ public class XmlFileService extends AbstractFileService {
                 }
                 rowNode.put("avg_headers", String.format("%.2f", row.getAvgHeaders()));
                 rowNode.put("avg_params", String.format("%.2f", row.getAvgQueryParams()));
-            });
+            }
 
             pagesOut = pageNumber >= page.getTotalPages();
         }

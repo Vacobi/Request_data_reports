@@ -35,7 +35,7 @@ public abstract class AbstractFileService {
 
     @Transactional
     public ReportFileDto getReportFile(Long reportId) {
-        Optional<ReportFile> optionalReportFile = reportFileDao.findByReport_Id(reportId);
+        Optional<ReportFile> optionalReportFile = reportFileDao.findByMimeTypeAndReport_Id(getMimeType(), reportId);
 
         if (optionalReportFile.isEmpty()) {
             throw new ReportFileNotFound(reportId);

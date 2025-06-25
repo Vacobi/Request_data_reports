@@ -3,7 +3,7 @@ package axi.practice.data_generation_reports.controller;
 import axi.practice.data_generation_reports.dto.report.*;
 import axi.practice.data_generation_reports.dto.report_file.CreateReportFileRequestDto;
 import axi.practice.data_generation_reports.dto.report_file.ReportFileDto;
-import axi.practice.data_generation_reports.entity.enums.StorageType;
+import axi.practice.data_generation_reports.entity.enums.MimeType;
 import axi.practice.data_generation_reports.service.ReportService;
 import axi.practice.data_generation_reports.service.file_service.CsvFileService;
 import lombok.RequiredArgsConstructor;
@@ -73,7 +73,10 @@ public class ReportController {
     }
 
     @GetMapping("/file/{reportId}")
-    public ReportFileDto getReportFile(@PathVariable("reportId") Long reportId) {
+    public ReportFileDto getReportFile(
+            @PathVariable("reportId") Long reportId,
+            @RequestParam(defaultValue = "CSV") MimeType mimeType
+    ) {
         return csvFileService.getReportFile(reportId);
     }
 }

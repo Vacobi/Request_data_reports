@@ -1,5 +1,6 @@
 package axi.practice.data_generation_reports.dto.report_file;
 
+import axi.practice.data_generation_reports.entity.enums.MimeType;
 import axi.practice.data_generation_reports.entity.enums.StorageType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,7 @@ public class ReportFileDto {
     private String fileName;
     private String filePath;
     private StorageType storageType;
-    private String mimeType;
+    private MimeType mimeType;
     private byte[] fileData;
     private LocalDateTime createdAt;
 }

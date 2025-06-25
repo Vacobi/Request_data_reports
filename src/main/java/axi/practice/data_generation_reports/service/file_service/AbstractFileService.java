@@ -5,6 +5,7 @@ import axi.practice.data_generation_reports.dao.ReportFileDao;
 import axi.practice.data_generation_reports.dto.report_file.ReportFileDto;
 import axi.practice.data_generation_reports.entity.Report;
 import axi.practice.data_generation_reports.entity.ReportFile;
+import axi.practice.data_generation_reports.entity.enums.MimeType;
 import axi.practice.data_generation_reports.entity.enums.ReportStatus;
 import axi.practice.data_generation_reports.entity.enums.StorageType;
 import axi.practice.data_generation_reports.exception.*;
@@ -28,7 +29,7 @@ public abstract class AbstractFileService {
 
     protected abstract void generateFileContent(OutputStream outputStream, Report report) throws IOException;
 
-    protected abstract String getMimeType();
+    protected abstract MimeType getMimeType();
 
 
     @Transactional

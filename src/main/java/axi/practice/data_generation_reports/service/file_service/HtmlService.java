@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
-public class HtmlService extends AbstractFileService {
+public class HtmlService extends AbstractBuildingFileService<Element> {
 
     public HtmlService(
             ReportService reportService,
@@ -34,21 +34,13 @@ public class HtmlService extends AbstractFileService {
     }
 
     @Override
-    protected void generateFileContent(OutputStream outputStream, Report report) throws IOException {
+    protected Element createBuilder(OutputStream outputStream) {
         Document doc = Jsoup.parse("<!DOCTYPE html><html><head><title>Report</title></head><body></body></html>");
-        Element body = doc.body();
-
-        writeReportMetadata(body, report);
-
-        if (report.getStatus() != ReportStatus.FAILED) {
-            writeFilterData(body, report.getFilter());
-            writeReportRows(body, report);
-        }
-
-        outputStream.write(doc.outerHtml().getBytes(StandardCharsets.UTF_8));
+        return doc.body();
     }
 
-    private void writeReportMetadata(Element body, Report report) {
+    @Override
+    protected void writeReportMetadata(Element body, Report report) {
         Element metadata = body.appendElement("section").attr("id", "report_data");
         metadata.appendElement("h1").text("report_data");
         metadata.appendElement("p").text("report_id: " + report.getId());
@@ -57,7 +49,8 @@ public class HtmlService extends AbstractFileService {
         metadata.appendElement("p").text("finished_at: " + report.getFinishedAt());
     }
 
-    private void writeFilterData(Element body, RequestFilter filter) {
+    @Override
+    protected void writeFilterData(Element body, RequestFilter filter) {
         Element section = body.appendElement("section").attr("id", "filter_id");
 
         section.appendElement("h2").text("filter");
@@ -89,7 +82,8 @@ public class HtmlService extends AbstractFileService {
         }
     }
 
-    private void writeReportRows(Element body, Report report) {
+    @Override
+    protected void writeReportRows(Element body, Report report) {
         Element section = body.appendElement("section").attr("id", "rows");
         section.appendElement("h2").text("report_rows");
 
@@ -122,6 +116,11 @@ public class HtmlService extends AbstractFileService {
 
             pagesOut = pageNumber >= page.getTotalPages();
         }
+    }
+
+    @Override
+    protected void endBuilding(Element builder, OutputStream outputStream) throws IOException {
+        outputStream.write(builder.outerHtml().getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

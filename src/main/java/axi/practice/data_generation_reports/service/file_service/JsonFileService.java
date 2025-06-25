@@ -7,7 +7,6 @@ import axi.practice.data_generation_reports.dto.report_row.ReportRowDto;
 import axi.practice.data_generation_reports.entity.Report;
 import axi.practice.data_generation_reports.entity.RequestFilter;
 import axi.practice.data_generation_reports.entity.enums.MimeType;
-import axi.practice.data_generation_reports.entity.enums.ReportStatus;
 import axi.practice.data_generation_reports.mapper.ReportFileMapper;
 import axi.practice.data_generation_reports.service.ReportService;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -22,7 +21,9 @@ import java.io.OutputStream;
 import java.util.List;
 
 @Service
-public class JsonFileService extends AbstractFileService {
+public class JsonFileService extends AbstractBuildingFileService<ObjectNode> {
+
+    private final JsonMapper jsonMapper;
 
     public JsonFileService(
             ReportService reportService,
@@ -31,25 +32,18 @@ public class JsonFileService extends AbstractFileService {
             ReportFileMapper reportFileMapper,
             String reportsDirectory) {
         super(reportService, reportDao, reportFileDao, reportFileMapper, reportsDirectory);
+
+        this.jsonMapper = new JsonMapper();
+        jsonMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     @Override
-    protected void generateFileContent(OutputStream outputStream, Report report) throws IOException {
-        JsonMapper jsonMapper = new JsonMapper();
-        jsonMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        ObjectNode root = jsonMapper.createObjectNode();
-
-        writeReportMetadata(root, report);
-
-        if (report.getStatus() != ReportStatus.FAILED) {
-            writeFilterData(root, report.getFilter());
-            writeReportRows(root, report);
-        }
-
-        jsonMapper.writeValue(outputStream, root);
+    protected ObjectNode createBuilder(OutputStream outputStream) {
+        return jsonMapper.createObjectNode();
     }
 
-    private void writeReportMetadata(ObjectNode root, Report report) {
+    @Override
+    protected void writeReportMetadata(ObjectNode root, Report report) {
         ObjectNode meta = root.putObject("report_data");
         meta.put("report_id", report.getId());
         meta.put("status", report.getStatus().name());
@@ -57,7 +51,8 @@ public class JsonFileService extends AbstractFileService {
         meta.put("finished_at", report.getFinishedAt().toString());
     }
 
-    private void writeFilterData(ObjectNode root, RequestFilter filter) {
+    @Override
+    protected void writeFilterData(ObjectNode root, RequestFilter filter) {
         ObjectNode filterNode = root.putObject("filter");
 
         filterNode.put("filter_id", filter.getId());
@@ -87,7 +82,8 @@ public class JsonFileService extends AbstractFileService {
         }
     }
 
-    private void writeReportRows(ObjectNode root, Report report) {
+    @Override
+    protected void writeReportRows(ObjectNode root, Report report) {
         ArrayNode rowsArray = root.putArray("report_rows");
 
         int pageNumber = 0;
@@ -114,6 +110,11 @@ public class JsonFileService extends AbstractFileService {
 
             pagesOut = pageNumber >= page.getTotalPages();
         }
+    }
+
+    @Override
+    protected void endBuilding(ObjectNode root, OutputStream outputStream) throws IOException {
+        jsonMapper.writeValue(outputStream, root);
     }
 
     @Override

@@ -22,7 +22,9 @@ import java.io.OutputStream;
 import java.util.List;
 
 @Service
-public class XmlFileService extends AbstractFileService {
+public class XmlFileService extends AbstractBuildingFileService<ObjectNode> {
+
+    private final XmlMapper xmlMapper;
 
     public XmlFileService(
             ReportService reportService,
@@ -31,28 +33,18 @@ public class XmlFileService extends AbstractFileService {
             ReportFileMapper reportFileMapper,
             String reportsDirectory) {
         super(reportService, reportDao, reportFileDao, reportFileMapper, reportsDirectory);
+
+        this.xmlMapper = new XmlMapper();
+        xmlMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     @Override
-    protected void generateFileContent(OutputStream outputStream, Report report) throws IOException {
-        XmlMapper xmlMapper = new XmlMapper();
-        xmlMapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-        ObjectNode root = xmlMapper.createObjectNode();
-
-        writeReportMetadata(root, report);
-
-        if (report.getStatus() != ReportStatus.FAILED) {
-            writeFilterData(root, report.getFilter());
-            writeReportRows(root, report);
-        }
-
-        xmlMapper.writer()
-                .withRootName("report")
-                .writeValue(outputStream, root);
+    protected ObjectNode createBuilder(OutputStream outputStream) {
+        return xmlMapper.createObjectNode();
     }
 
-    private void writeReportMetadata(ObjectNode root, Report report) {
+    @Override
+    protected void writeReportMetadata(ObjectNode root, Report report) {
         ObjectNode metadata = root.putObject("report_data");
         metadata.put("report_id", report.getId());
         metadata.put("status", report.getStatus().name());
@@ -60,7 +52,8 @@ public class XmlFileService extends AbstractFileService {
         metadata.put("finished_at", report.getFinishedAt().toString());
     }
 
-    private void writeFilterData(ObjectNode root, RequestFilter filter) {
+    @Override
+    protected void writeFilterData(ObjectNode root, RequestFilter filter) {
         ObjectNode filterNode = root.putObject("filter");
 
         filterNode.put("filter_id", filter.getId());
@@ -90,7 +83,8 @@ public class XmlFileService extends AbstractFileService {
         }
     }
 
-    private void writeReportRows(ObjectNode root, Report report) {
+    @Override
+    protected void writeReportRows(ObjectNode root, Report report) {
         ObjectNode rowsWrapper = root.putObject("report_rows");
         ArrayNode rowsArray = rowsWrapper.putArray("row");
 
@@ -118,6 +112,13 @@ public class XmlFileService extends AbstractFileService {
 
             pagesOut = pageNumber >= page.getTotalPages();
         }
+    }
+
+    @Override
+    protected void endBuilding(ObjectNode root, OutputStream outputStream) throws IOException {
+        xmlMapper.writer()
+                .withRootName("report")
+                .writeValue(outputStream, root);
     }
 
     @Override

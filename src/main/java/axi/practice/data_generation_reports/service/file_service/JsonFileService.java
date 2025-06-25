@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -96,7 +97,7 @@ public class JsonFileService extends AbstractFileService {
                     .reportId(report.getId())
                     .page(pageNumber++)
                     .build();
-            var page = reportService.getReport(request).getRows();
+            Page<ReportRowDto> page = reportService.getReport(request).getRows();
 
             List<ReportRowDto> rows = page.getContent();
             for (ReportRowDto row : rows) {

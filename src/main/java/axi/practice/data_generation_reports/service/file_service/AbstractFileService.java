@@ -154,7 +154,7 @@ public abstract class AbstractFileService {
     }
 
     protected String generateReportName(Report report) {
-        return "report_" + report.getId() + "." + getMimeType();
+        return "report_" + report.getId() + "." + getMimeType().toString();
     }
 
     private void createParentDirectory(File file) {

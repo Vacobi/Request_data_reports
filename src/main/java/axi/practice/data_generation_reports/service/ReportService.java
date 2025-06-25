@@ -173,7 +173,7 @@ public class ReportService {
         }
         Report report = optionalReport.get();
 
-        report.setReportFile(reportFile);
+        report.addReportFile(reportFile);
 
         return reportMapper.toReportDto(reportDao.save(report));
     }

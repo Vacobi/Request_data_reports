@@ -27,9 +27,9 @@ public class Report {
     @JoinColumn(name="filter_id")
     private RequestFilter filter;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name="report_file_id")
-    private ReportFile reportFile;
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<ReportFile> reportFiles = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -64,6 +64,10 @@ public class Report {
     }
 
     public boolean stored() {
-        return reportFile != null;
+        return !reportFiles.isEmpty();
+    }
+
+    public void addReportFile(ReportFile file) {
+        this.reportFiles.add(file);
     }
 }

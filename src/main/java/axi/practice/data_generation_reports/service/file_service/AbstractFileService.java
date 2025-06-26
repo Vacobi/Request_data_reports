@@ -47,7 +47,7 @@ public abstract class AbstractFileService {
     @Transactional
     public ReportFileDto createReportFile(CreateReportFileRequestDto createRequestDto) {
 
-        Optional<ReportFile> sameReportFile = reportFileDao.findByMimeTypeAndReport_Id(getMimeType(), createRequestDto.getReportId());
+        Optional<ReportFile> sameReportFile = reportFileDao.findByMimeTypeAndReport_Id(createRequestDto.getMimeType(), createRequestDto.getReportId());
         if (sameReportFile.isPresent()) {
             throw new ReportFileAlreadyStored(createRequestDto.getReportId(), sameReportFile.get().getId());
         }

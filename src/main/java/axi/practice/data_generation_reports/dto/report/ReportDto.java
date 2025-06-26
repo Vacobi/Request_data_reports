@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -20,7 +19,7 @@ import java.util.Set;
 public class ReportDto {
     private Long id;
     private RequestFilterDto filter;
-    private Set<ReportFileDto> reportFiles;
+    private ReportFileDto reportFile;
     private ReportStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime finishedAt;

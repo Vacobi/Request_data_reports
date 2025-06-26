@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -308,5 +309,66 @@ abstract class AbstractFileServiceTest extends ClearableTest {
 
         assertEquals(expectedExceptionName, actualExceptionName);
         assertEquals(filesCountBeforeGenerate + 1, filesCountAfterGenerate);
+    }
+
+    @Test
+    void generateReportFileWhenExistingAllOtherFileTypes() {
+        createRequestDtos(3);
+        Report actualReport = generateReport(1).get(0);
+
+        StorageType storageType = StorageType.DATABASE;
+
+        Arrays.stream(MimeType.values()).forEach(mimeType -> {
+            if (mimeType != getMimeType()) {
+                CreateReportFileRequestDto createReportFileRequestDto = CreateReportFileRequestDto.builder()
+                        .reportId(actualReport.getId())
+                        .mimeType(mimeType)
+                        .storageType(storageType)
+                        .build();
+
+                fileService.createReportFile(createReportFileRequestDto);
+            }
+        });
+
+        CreateReportFileRequestDto createReportFileRequestDto = CreateReportFileRequestDto.builder()
+                .reportId(actualReport.getId())
+                .mimeType(getMimeType())
+                .storageType(storageType)
+                .build();
+
+
+        long filesCountBeforeGenerate = reportFileDao.count();
+
+        ReportFileDto actualDto = fileService.createReportFile(createReportFileRequestDto);
+        ReportFile actual = reportFileDao.findByIdDetailed(actualDto.getId()).get();
+
+        long filesCountAfterGenerate = reportFileDao.count();
+
+
+        String expectedFileName = "report_" + actualReport.getId() + "." + getMimeType().toString().toLowerCase();
+        ReportFileDto expectedDto = ReportFileDto.builder()
+                .id(actualDto.getId())
+                .reportId(actualReport.getId())
+                .fileName(expectedFileName)
+                .filePath(actualDto.getFilePath())
+                .storageType(storageType)
+                .mimeType(getMimeType())
+                .fileData(actualDto.getFileData())
+                .createdAt(actualDto.getCreatedAt())
+                .build();
+        ReportFile expected = ReportFile.builder()
+                .id(actualDto.getId())
+                .report(actualReport)
+                .fileName(expectedFileName)
+                .filePath(actualDto.getFilePath())
+                .storageType(storageType)
+                .mimeType(getMimeType())
+                .fileData(actual.getFileData())
+                .createdAt(actualDto.getCreatedAt())
+                .build();
+
+        assertReportFilesDtoEquals(expectedDto, actualDto);
+        assertReportFilesEquals(expected, actual);
+        assertEquals(filesCountBeforeGenerate + Arrays.stream(MimeType.values()).count(), filesCountAfterGenerate);
     }
 }

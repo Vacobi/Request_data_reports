@@ -6,17 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 @ContextConfiguration(initializers = TestContainersConfig.class)
-class CsvFileServiceTest extends AbstractFileServiceTest {
+class HtmlServiceTest extends AbstractFileServiceTest {
 
     @Autowired
-    public CsvFileServiceTest(CsvFileService csvFileService) {
-        super(csvFileService);
+    public HtmlServiceTest(HtmlService htmlFileService) {
+        super(htmlFileService);
     }
 
     @Override
     protected MimeType getMimeType() {
-        return MimeType.CSV;
+        return MimeType.HTML;
     }
 }

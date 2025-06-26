@@ -169,9 +169,10 @@ class ReportServiceTest extends ClearableTest {
             long countReportRowsAfterRequest = reportRowDao.count();
 
             Optional<Report> optionalActualReport = reportDao.findLastWithRows();
-            Report actualReport = optionalActualReport.get();
+            Report processingReport = optionalActualReport.get();
             await().atMost(10, TimeUnit.SECONDS)
-                    .until(() -> reportService.getStatus(actualReport.getId()) == ReportStatus.FAILED);
+                    .until(() -> reportService.getStatus(processingReport.getId()) == ReportStatus.FAILED);
+            Report actualReport = reportDao.findByIdWithFilterAndRows(processingReport.getId()).get();
 
             Report expectedReport = Report.builder()
                     .id(actualReport.getId())

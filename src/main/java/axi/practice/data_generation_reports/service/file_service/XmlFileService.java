@@ -22,7 +22,9 @@ import java.io.OutputStream;
 import java.util.List;
 
 @Service
-public class XmlFileService extends AbstractFileService {
+public class XmlFileService extends AbstractObjectNodeBuildingFileService {
+
+    private final XmlMapper xmlMapper;
 
     public XmlFileService(
             ReportService reportService,
@@ -31,93 +33,21 @@ public class XmlFileService extends AbstractFileService {
             ReportFileMapper reportFileMapper,
             String reportsDirectory) {
         super(reportService, reportDao, reportFileDao, reportFileMapper, reportsDirectory);
+
+        this.xmlMapper = new XmlMapper();
+        xmlMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     @Override
-    protected void generateFileContent(OutputStream outputStream, Report report) throws IOException {
-        XmlMapper xmlMapper = new XmlMapper();
-        xmlMapper.enable(SerializationFeature.INDENT_OUTPUT);
+    protected ObjectNode createBuilder(OutputStream outputStream) {
+        return xmlMapper.createObjectNode();
+    }
 
-        ObjectNode root = xmlMapper.createObjectNode();
-
-        writeReportMetadata(root, report);
-
-        if (report.getStatus() != ReportStatus.FAILED) {
-            writeFilterData(root, report.getFilter());
-            writeReportRows(root, report);
-        }
-
+    @Override
+    protected void endBuilding(ObjectNode root, OutputStream outputStream) throws IOException {
         xmlMapper.writer()
                 .withRootName("report")
                 .writeValue(outputStream, root);
-    }
-
-    private void writeReportMetadata(ObjectNode root, Report report) {
-        ObjectNode metadata = root.putObject("report_data");
-        metadata.put("report_id", report.getId());
-        metadata.put("status", report.getStatus().name());
-        metadata.put("created_at", report.getCreatedAt().toString());
-        metadata.put("finished_at", report.getFinishedAt().toString());
-    }
-
-    private void writeFilterData(ObjectNode root, RequestFilter filter) {
-        ObjectNode filterNode = root.putObject("filter");
-
-        filterNode.put("filter_id", filter.getId());
-
-        if (filter.getHost() != null) {
-            filterNode.put("host", filter.getHost());
-        }
-
-        if (filter.getPath() != null) {
-            filterNode.put("path", filter.getPath());
-        }
-
-        if (filter.getFromDate() != null) {
-            filterNode.put("from", filter.getFromDate().toString());
-        }
-
-        if (filter.getToDate() != null) {
-            filterNode.put("to", filter.getToDate().toString());
-        }
-
-        if (filter.getAvgHeaders() != null) {
-            filterNode.put("avg_headers", filter.getAvgHeaders());
-        }
-
-        if (filter.getAvgQueryParams() != null) {
-            filterNode.put("avg_params", filter.getAvgQueryParams());
-        }
-    }
-
-    private void writeReportRows(ObjectNode root, Report report) {
-        ObjectNode rowsWrapper = root.putObject("report_rows");
-        ArrayNode rowsArray = rowsWrapper.putArray("row");
-
-        int pageNumber = 0;
-        boolean pagesOut = false;
-        while (!pagesOut) {
-            GetReportPageRequestDto request = GetReportPageRequestDto.builder()
-                    .reportId(report.getId())
-                    .page(pageNumber++)
-                    .build();
-            Page<ReportRowDto> page = reportService.getReport(request).getRows();
-
-            List<ReportRowDto> rows = page.getContent();
-            for (ReportRowDto row : rows) {
-                ObjectNode rowNode = rowsArray.addObject();
-
-                rowNode.put("rowUUID", row.getRowUUID().toString());
-                rowNode.put("host", row.getHost());
-                if (row.getPath() != null) {
-                    rowNode.put("path", row.getPath());
-                }
-                rowNode.put("avg_headers", String.format("%.2f", row.getAvgHeaders()));
-                rowNode.put("avg_params", String.format("%.2f", row.getAvgQueryParams()));
-            }
-
-            pagesOut = pageNumber >= page.getTotalPages();
-        }
     }
 
     @Override

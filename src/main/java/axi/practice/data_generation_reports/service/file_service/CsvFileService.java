@@ -7,7 +7,6 @@ import axi.practice.data_generation_reports.dto.report_row.ReportRowDto;
 import axi.practice.data_generation_reports.entity.Report;
 import axi.practice.data_generation_reports.entity.RequestFilter;
 import axi.practice.data_generation_reports.entity.enums.MimeType;
-import axi.practice.data_generation_reports.entity.enums.ReportStatus;
 import axi.practice.data_generation_reports.mapper.ReportFileMapper;
 import axi.practice.data_generation_reports.service.ReportService;
 import org.apache.commons.csv.CSVFormat;
@@ -19,7 +18,7 @@ import java.io.*;
 import java.util.List;
 
 @Service
-public class CsvFileService extends AbstractFileService {
+public class CsvFileService extends AbstractBuildingFileService<CSVPrinter> {
 
     public CsvFileService(
             ReportService reportService,
@@ -31,25 +30,13 @@ public class CsvFileService extends AbstractFileService {
     }
 
     @Override
-    protected void generateFileContent(OutputStream outputStream, Report report) throws IOException {
+    protected CSVPrinter createBuilder(OutputStream outputStream) throws IOException {
         Writer writer = new OutputStreamWriter(outputStream);
-        CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
-
-        writeReportMetadata(csvPrinter, report);
-
-        if (report.getStatus() != ReportStatus.FAILED) {
-            csvPrinter.println();
-            writeFilterData(csvPrinter, report.getFilter());
-
-            csvPrinter.println();
-            writeReportRows(csvPrinter, report);
-        }
-
-        csvPrinter.flush();
-        writer.flush();
+        return new CSVPrinter(writer, CSVFormat.DEFAULT);
     }
 
-    private void writeReportMetadata(CSVPrinter csvPrinter, Report report) throws IOException {
+    @Override
+    protected void writeReportMetadata(CSVPrinter csvPrinter, Report report) throws IOException {
         csvPrinter.printRecord(
                 "report_id",
                 "status",
@@ -62,9 +49,12 @@ public class CsvFileService extends AbstractFileService {
                 report.getCreatedAt(),
                 report.getFinishedAt()
         );
+
+        csvPrinter.println();
     }
 
-    private void writeFilterData(CSVPrinter csvPrinter, RequestFilter filter) throws IOException {
+    @Override
+    protected void writeFilterData(CSVPrinter csvPrinter, RequestFilter filter) throws IOException {
         csvPrinter.printRecord("filter_id",
                 "from",
                 "to",
@@ -79,13 +69,16 @@ public class CsvFileService extends AbstractFileService {
                 filter.getPath(),
                 write(filter.getAvgHeaders()),
                 write(filter.getAvgQueryParams()));
+
+        csvPrinter.println();
     }
 
     private String write(Double value) {
         return value == null ? "" : String.format("%.2f", value);
     }
 
-    private void writeReportRows(CSVPrinter csvPrinter, Report report) throws IOException {
+    @Override
+    protected void writeReportRows(CSVPrinter csvPrinter, Report report) throws IOException {
         csvPrinter.printRecord("rowUUID", "host", "path", "avg_headers", "avg_params");
 
         int pageNumber = 0;
@@ -110,6 +103,11 @@ public class CsvFileService extends AbstractFileService {
 
             pagesOut = pageNumber >= page.getTotalPages();
         }
+    }
+
+    @Override
+    protected void endBuilding(CSVPrinter builder, OutputStream outputStream) throws IOException {
+        builder.flush();
     }
 
     @Override

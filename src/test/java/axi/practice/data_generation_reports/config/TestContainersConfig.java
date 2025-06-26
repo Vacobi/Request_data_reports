@@ -20,14 +20,18 @@ public class TestContainersConfig implements ApplicationContextInitializer<Confi
         postgresContainer.start();
 
         String rawUrl = postgresContainer.getJdbcUrl();
-        String log4jdbcUrl = rawUrl.replace("jdbc:", "jdbc:log4jdbc:"); // ✅ if using log4jdbc
+        String log4jdbcUrl = rawUrl.replace("jdbc:", "jdbc:log4jdbc:");
 
         TestPropertyValues.of(
                 "spring.datasource.url=" + log4jdbcUrl,
                 "spring.datasource.driver-class-name=net.sf.log4jdbc.sql.jdbcapi.DriverSpy",
                 "spring.datasource.username=" + postgresContainer.getUsername(),
                 "spring.datasource.password=" + postgresContainer.getPassword(),
-                "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect"
+                "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect",
+
+                "spring.liquibase.url=" + rawUrl,
+                "spring.liquibase.user=" + postgresContainer.getUsername(),
+                "spring.liquibase.password=" + postgresContainer.getPassword()
         ).applyTo(applicationContext.getEnvironment());
     }
 }

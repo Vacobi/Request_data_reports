@@ -27,7 +27,7 @@ public class ReportController {
     private Map<MimeType, AbstractFileService> fileServiceMap;
 
     @PostConstruct
-    public void init() {
+    private void init() {
         fileServiceMap = fileServices.stream()
                 .collect(Collectors.toMap(
                         AbstractFileService::getMimeType,

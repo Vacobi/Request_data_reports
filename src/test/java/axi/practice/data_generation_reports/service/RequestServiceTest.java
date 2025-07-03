@@ -15,7 +15,7 @@ import axi.practice.data_generation_reports.entity.QueryParam;
 import axi.practice.data_generation_reports.entity.Request;
 import axi.practice.data_generation_reports.exception.ClientExceptionName;
 import axi.practice.data_generation_reports.exception.GroupValidationException;
-import axi.practice.data_generation_reports.exception.IncorrectRawRequest;
+import axi.practice.data_generation_reports.exception.IncorrectRawRequestException;
 import axi.practice.data_generation_reports.exception.ValidationException;
 import axi.practice.data_generation_reports.mapper.HeaderMapper;
 import axi.practice.data_generation_reports.mapper.QueryParamMapper;
@@ -820,8 +820,8 @@ class RequestServiceTest extends ClearableTest {
             long queryParamsBeforeSave = queryParamDao.count();
             long requestBeforeSave = requestDao.count();
 
-            IncorrectRawRequest actualException =
-                    assertThrows(IncorrectRawRequest.class, () -> requestService.create(raw));
+            IncorrectRawRequestException actualException =
+                    assertThrows(IncorrectRawRequestException.class, () -> requestService.create(raw));
 
             long headersAfterSave = headerDao.count();
             long queryParamsAfterSave = queryParamDao.count();

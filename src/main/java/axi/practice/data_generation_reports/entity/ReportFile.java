@@ -1,5 +1,6 @@
 package axi.practice.data_generation_reports.entity;
 
+import axi.practice.data_generation_reports.entity.enums.MimeType;
 import axi.practice.data_generation_reports.entity.enums.StorageType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,7 +24,7 @@ public class ReportFile {
     @Column(name="id", nullable = false)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "report_id", nullable = false)
     private Report report;
 
@@ -37,8 +38,9 @@ public class ReportFile {
     @Column(name = "storage_type", nullable = false)
     private StorageType storageType;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "mime_type", nullable = false)
-    private String mimeType;
+    private MimeType mimeType;
 
     @Lob
     @JdbcTypeCode(Types.BINARY)

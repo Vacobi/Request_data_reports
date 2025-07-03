@@ -12,7 +12,7 @@ import axi.practice.data_generation_reports.entity.ReportFile;
 import axi.practice.data_generation_reports.entity.ReportRow;
 import axi.practice.data_generation_reports.entity.RequestFilter;
 import axi.practice.data_generation_reports.entity.enums.ReportStatus;
-import axi.practice.data_generation_reports.exception.ReportNotFound;
+import axi.practice.data_generation_reports.exception.ReportNotFoundException;
 import axi.practice.data_generation_reports.mapper.ReportMapper;
 import axi.practice.data_generation_reports.mapper.ReportRowMapper;
 import axi.practice.data_generation_reports.mapper.RequestFilterMapper;
@@ -117,7 +117,7 @@ public class ReportService {
         Optional<ReportStatus> optionalStatus = reportDao.getStatus(reportId);
 
         if (optionalStatus.isEmpty()) {
-            throw new ReportNotFound(reportId);
+            throw new ReportNotFoundException(reportId);
         }
 
         return optionalStatus.get();
@@ -127,7 +127,7 @@ public class ReportService {
         Optional<ReportStatus> optionalStatus = reportDao.getStatus(reportId);
 
         if (optionalStatus.isEmpty()) {
-            throw new ReportNotFound(reportId);
+            throw new ReportNotFoundException(reportId);
         }
 
         return optionalStatus.get() == ReportStatus.COMPLETED;
@@ -138,7 +138,7 @@ public class ReportService {
 
         Optional<Report> optionalReport = reportDao.findById(requestDto.getReportId());
         if (optionalReport.isEmpty()) {
-            throw new ReportNotFound(requestDto.getReportId());
+            throw new ReportNotFoundException(requestDto.getReportId());
         }
         Report report = optionalReport.get();
 
@@ -169,11 +169,11 @@ public class ReportService {
     public ReportDto addReportFileToReport(Long reportId, ReportFile reportFile) {
         Optional<Report> optionalReport = reportDao.findById(reportId);
         if (optionalReport.isEmpty()) {
-            throw new ReportNotFound(reportId);
+            throw new ReportNotFoundException(reportId);
         }
         Report report = optionalReport.get();
 
-        report.setReportFile(reportFile);
+        report.addReportFile(reportFile);
 
         return reportMapper.toReportDto(reportDao.save(report));
     }

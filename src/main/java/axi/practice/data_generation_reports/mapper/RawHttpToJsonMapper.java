@@ -2,7 +2,7 @@ package axi.practice.data_generation_reports.mapper;
 
 import axi.practice.data_generation_reports.dto.queryparam.CreateQueryParamRequestDto;
 import axi.practice.data_generation_reports.dto.request.CreateRequestDto;
-import axi.practice.data_generation_reports.exception.IncorrectRawRequest;
+import axi.practice.data_generation_reports.exception.IncorrectRawRequestException;
 import org.apache.hc.core5.net.URIBuilder;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +24,7 @@ public class RawHttpToJsonMapper {
         try {
             uri = new URI(urlToParse);
         } catch (Exception e) {
-            throw new IncorrectRawRequest(inputUrl);
+            throw new IncorrectRawRequestException(inputUrl);
         }
 
         URIBuilder b = new URIBuilder(uri);

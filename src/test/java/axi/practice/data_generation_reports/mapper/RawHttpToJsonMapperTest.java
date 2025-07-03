@@ -4,7 +4,7 @@ import axi.practice.data_generation_reports.config.TestContainersConfig;
 import axi.practice.data_generation_reports.dto.queryparam.CreateQueryParamRequestDto;
 import axi.practice.data_generation_reports.dto.request.CreateRequestDto;
 import axi.practice.data_generation_reports.exception.ClientExceptionName;
-import axi.practice.data_generation_reports.exception.IncorrectRawRequest;
+import axi.practice.data_generation_reports.exception.IncorrectRawRequestException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -117,7 +117,7 @@ class RawHttpToJsonMapperTest {
     void emptyString() {
         String raw = "";
 
-        IncorrectRawRequest actualException = assertThrows(IncorrectRawRequest.class, () -> mapper.toCreateRequestDto(raw));
+        IncorrectRawRequestException actualException = assertThrows(IncorrectRawRequestException.class, () -> mapper.toCreateRequestDto(raw));
 
         ClientExceptionName expectedExceptionName = ClientExceptionName.INVALID_RAW_REQUEST;
 

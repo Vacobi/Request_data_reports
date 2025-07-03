@@ -13,7 +13,7 @@ import axi.practice.data_generation_reports.entity.ReportRow;
 import axi.practice.data_generation_reports.entity.RequestFilter;
 import axi.practice.data_generation_reports.entity.enums.ReportStatus;
 import axi.practice.data_generation_reports.exception.ClientExceptionName;
-import axi.practice.data_generation_reports.exception.ReportNotFound;
+import axi.practice.data_generation_reports.exception.ReportNotFoundException;
 import axi.practice.data_generation_reports.util.ClearableTest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -408,7 +408,7 @@ class ReportServiceTest extends ClearableTest {
 
             ClientExceptionName expected = ClientExceptionName.REPORT_NOT_FOUND;
 
-            ClientExceptionName actual = assertThrows(ReportNotFound.class, () -> reportService.getStatus(nonExistingId)).getExceptionName();
+            ClientExceptionName actual = assertThrows(ReportNotFoundException.class, () -> reportService.getStatus(nonExistingId)).getExceptionName();
 
             assertEquals(expected, actual);
         }
@@ -443,7 +443,7 @@ class ReportServiceTest extends ClearableTest {
 
             ClientExceptionName expected = ClientExceptionName.REPORT_NOT_FOUND;
 
-            ClientExceptionName actual = assertThrows(ReportNotFound.class, () -> reportService.completed(nonExistingId)).getExceptionName();
+            ClientExceptionName actual = assertThrows(ReportNotFoundException.class, () -> reportService.completed(nonExistingId)).getExceptionName();
 
             assertEquals(expected, actual);
         }
@@ -475,7 +475,7 @@ class ReportServiceTest extends ClearableTest {
 
             ClientExceptionName expected = ClientExceptionName.REPORT_NOT_FOUND;
 
-            ClientExceptionName actual = assertThrows(ReportNotFound.class, () -> reportService.getReport(requestDto)).getExceptionName();
+            ClientExceptionName actual = assertThrows(ReportNotFoundException.class, () -> reportService.getReport(requestDto)).getExceptionName();
 
             assertEquals(expected, actual);
         }

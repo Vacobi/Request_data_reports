@@ -15,7 +15,7 @@ import axi.practice.data_generation_reports.entity.enums.MimeType;
 import axi.practice.data_generation_reports.entity.enums.ReportStatus;
 import axi.practice.data_generation_reports.entity.enums.StorageType;
 import axi.practice.data_generation_reports.exception.ClientExceptionName;
-import axi.practice.data_generation_reports.exception.ReportFileAlreadyStored;
+import axi.practice.data_generation_reports.exception.ReportFileAlreadyStoredException;
 import axi.practice.data_generation_reports.service.ReportService;
 import axi.practice.data_generation_reports.service.RequestService;
 import axi.practice.data_generation_reports.util.ClearableTest;
@@ -303,7 +303,7 @@ abstract class AbstractFileServiceTest extends ClearableTest {
         long filesCountBeforeGenerate = reportFileDao.count();
 
         fileService.createReportFile(createReportFileRequestDto);
-        ReportFileAlreadyStored actualException = assertThrows(ReportFileAlreadyStored.class, () -> fileService.createReportFile(createReportFileRequestDto));
+        ReportFileAlreadyStoredException actualException = assertThrows(ReportFileAlreadyStoredException.class, () -> fileService.createReportFile(createReportFileRequestDto));
         ClientExceptionName actualExceptionName = actualException.getExceptionName();
 
         long filesCountAfterGenerate = reportFileDao.count();

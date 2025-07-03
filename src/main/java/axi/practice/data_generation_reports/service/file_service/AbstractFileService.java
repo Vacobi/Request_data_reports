@@ -38,7 +38,7 @@ public abstract class AbstractFileService {
         Optional<ReportFile> optionalReportFile = reportFileDao.findByMimeTypeAndReport_Id(getMimeType(), reportId);
 
         if (optionalReportFile.isEmpty()) {
-            throw new ReportFileNotFound(reportId);
+            throw new ReportFileNotFoundException(reportId);
         }
 
         return reportFileMapper.toReportFileDto(optionalReportFile.get());
@@ -49,7 +49,7 @@ public abstract class AbstractFileService {
 
         Optional<ReportFile> sameReportFile = reportFileDao.findByMimeTypeAndReport_Id(getMimeType(), createRequestDto.getReportId());
         if (sameReportFile.isPresent()) {
-            throw new ReportFileAlreadyStored(createRequestDto.getReportId(), sameReportFile.get().getId());
+            throw new ReportFileAlreadyStoredException(createRequestDto.getReportId(), sameReportFile.get().getId());
         }
 
         Report report = getValidatedReport(createRequestDto.getReportId());
@@ -79,7 +79,7 @@ public abstract class AbstractFileService {
     private Report getRawReport(Long reportId) {
         Optional<Report> optionalReport = reportDao.findById(reportId);
         if (optionalReport.isEmpty()) {
-            throw new ReportNotFound(reportId);
+            throw new ReportNotFoundException(reportId);
         }
 
         return optionalReport.get();
@@ -87,7 +87,7 @@ public abstract class AbstractFileService {
 
     private void verifyState(Report report) {
         if (!ReportStatus.isFinalState(report.getStatus())) {
-            throw new ReportIsNotInFinalState(report.getId());
+            throw new ReportIsNotInFinalStateException(report.getId());
         }
     }
 
@@ -96,7 +96,7 @@ public abstract class AbstractFileService {
             generateFileContent(outputStream, report);
             return outputStream.toByteArray();
         } catch (IOException e) {
-            throw new CanNotGenerateFile("report_" + report.getId());
+            throw new CanNotGenerateFileException("report_" + report.getId());
         }
     }
 
@@ -118,7 +118,7 @@ public abstract class AbstractFileService {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(fileContent);
         } catch (IOException e) {
-            throw new CanNotGenerateFile("Failed to write file: " + file.getName());
+            throw new CanNotGenerateFileException("Failed to write file: " + file.getName());
         }
 
         return ReportFile.builder()
@@ -146,7 +146,7 @@ public abstract class AbstractFileService {
         File file = new File(reportsDirectory + fileName);
 
         if (file.exists()) {
-            throw new ReportFileAlreadyStored(file.getAbsolutePath());
+            throw new ReportFileAlreadyStoredException(file.getAbsolutePath());
         }
 
         createParentDirectory(file);

@@ -27,9 +27,9 @@ public class GroupRequestStatsService {
     @Transactional
     public Page<GroupRequestStatDto> getRequestGroupsStats(GetGroupRequestStatsDto requestDto) {
 
-        Pageable pageable = PageRequest.of(requestDto.getPage(), dataPageSize);
-
         requestFilterService.createFilter(requestDto.getRequestFilter());
+
+        Pageable pageable = PageRequest.of(requestDto.getPage(), dataPageSize);
 
         Page<GroupRequestStat> pageOfGroupsStats = groupRequestStatDao.findAll(pageable);
 

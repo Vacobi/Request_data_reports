@@ -1,0 +1,1 @@
+update report_files set mime_type = UPPER(mime_type);

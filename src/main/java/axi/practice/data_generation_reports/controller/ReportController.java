@@ -1,13 +1,20 @@
 package axi.practice.data_generation_reports.controller;
 
 import axi.practice.data_generation_reports.dto.report.*;
+import axi.practice.data_generation_reports.dto.report_file.CreateReportFileRequestDto;
 import axi.practice.data_generation_reports.dto.report_file.ReportFileDto;
-import axi.practice.data_generation_reports.entity.enums.StorageType;
+import axi.practice.data_generation_reports.entity.enums.MimeType;
 import axi.practice.data_generation_reports.service.ReportService;
-import axi.practice.data_generation_reports.service.file_service.CsvFileService;
+import axi.practice.data_generation_reports.service.file_service.AbstractFileService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/reports")
@@ -16,7 +23,17 @@ public class ReportController {
 
     private final ReportService reportService;
 
-    private final CsvFileService csvFileService;
+    private final List<AbstractFileService> fileServices;
+    private Map<MimeType, AbstractFileService> fileServiceMap;
+
+    @PostConstruct
+    private void init() {
+        fileServiceMap = fileServices.stream()
+                .collect(Collectors.toMap(
+                        AbstractFileService::getMimeType,
+                        Function.identity()
+                ));
+    }
 
     @PostMapping
     public GenerateReportResponseDto generateReport(
@@ -63,16 +80,20 @@ public class ReportController {
         return reportService.getReports(page);
     }
 
-    @PostMapping("/file/{reportId}")
-    public ReportFileDto generateReportCsvFile(
-            @PathVariable("reportId") Long reportId,
-            @RequestParam(defaultValue = "DISK") StorageType storageType
+    @PostMapping("/file")
+    public ReportFileDto generateReportFile(
+            @RequestBody CreateReportFileRequestDto requestDto
             ) {
-        return csvFileService.createReportFile(reportId, storageType);
+
+        return fileServiceMap.get(requestDto.getMimeType()).createReportFile(requestDto);
     }
 
     @GetMapping("/file/{reportId}")
-    public ReportFileDto getReportFile(@PathVariable("reportId") Long reportId) {
-        return csvFileService.getReportFile(reportId);
+    public ReportFileDto getReportFile(
+            @PathVariable("reportId") Long reportId,
+            @RequestParam(defaultValue = "CSV") MimeType mimeType
+    ) {
+
+        return fileServiceMap.get(mimeType).getReportFile(reportId);
     }
 }

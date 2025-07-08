@@ -7,19 +7,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class ReportFileDto {
-    private Long id;
+public class CreateReportFileRequestDto {
     private Long reportId;
-    private String fileName;
-    private String filePath;
     private StorageType storageType;
     private MimeType mimeType;
-    private byte[] fileData;
-    private LocalDateTime createdAt;
 }

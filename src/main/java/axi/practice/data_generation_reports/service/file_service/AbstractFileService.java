@@ -2,9 +2,11 @@ package axi.practice.data_generation_reports.service.file_service;
 
 import axi.practice.data_generation_reports.dao.ReportDao;
 import axi.practice.data_generation_reports.dao.ReportFileDao;
+import axi.practice.data_generation_reports.dto.report_file.CreateReportFileRequestDto;
 import axi.practice.data_generation_reports.dto.report_file.ReportFileDto;
 import axi.practice.data_generation_reports.entity.Report;
 import axi.practice.data_generation_reports.entity.ReportFile;
+import axi.practice.data_generation_reports.entity.enums.MimeType;
 import axi.practice.data_generation_reports.entity.enums.ReportStatus;
 import axi.practice.data_generation_reports.entity.enums.StorageType;
 import axi.practice.data_generation_reports.exception.*;
@@ -28,42 +30,40 @@ public abstract class AbstractFileService {
 
     protected abstract void generateFileContent(OutputStream outputStream, Report report) throws IOException;
 
-    protected abstract String generateReportName(Report report);
-
-    protected abstract String getMimeType();
+    public abstract MimeType getMimeType();
 
 
     @Transactional
     public ReportFileDto getReportFile(Long reportId) {
-        Optional<ReportFile> optionalReportFile = reportFileDao.findByReport_Id(reportId);
+        Optional<ReportFile> optionalReportFile = reportFileDao.findByMimeTypeAndReport_Id(getMimeType(), reportId);
 
         if (optionalReportFile.isEmpty()) {
-            throw new ReportFileNotFound(reportId);
+            throw new ReportFileNotFoundException(reportId);
         }
 
         return reportFileMapper.toReportFileDto(optionalReportFile.get());
     }
 
     @Transactional
-    public ReportFileDto createReportFile(Long reportId, StorageType storageType) {
+    public ReportFileDto createReportFile(CreateReportFileRequestDto createRequestDto) {
 
-        Report rawReport = getRawReport(reportId);
-        if (getRawReport(reportId).stored()) {
-            throw new ReportFileAlreadyStored(reportId, rawReport.getReportFile().getId());
+        Optional<ReportFile> sameReportFile = reportFileDao.findByMimeTypeAndReport_Id(getMimeType(), createRequestDto.getReportId());
+        if (sameReportFile.isPresent()) {
+            throw new ReportFileAlreadyStoredException(createRequestDto.getReportId(), sameReportFile.get().getId());
         }
 
-        Report report = getValidatedReport(reportId);
+        Report report = getValidatedReport(createRequestDto.getReportId());
         String fileName = generateReportName(report);
 
         byte[] fileContent = generateFileContent(report);
 
-        ReportFile reportFile = saveReportFile(report, fileName, fileContent, storageType);
+        ReportFile reportFile = saveReportFile(report, fileName, fileContent, createRequestDto.getStorageType());
 
         linkReportToFile(report.getId(), reportFile);
 
         // Нужно, чтобы получить id записи (тк в Report каскадное сохранение)
         // get без проверки потому что, по логике, он там должен быть
-        ReportFile persisted = reportFileDao.findByReport_Id(reportId).get();
+        ReportFile persisted = reportFileDao.findByMimeTypeAndReport_Id(getMimeType(), createRequestDto.getReportId()).get();
 
         return reportFileMapper.toReportFileDto(persisted);
     }
@@ -79,7 +79,7 @@ public abstract class AbstractFileService {
     private Report getRawReport(Long reportId) {
         Optional<Report> optionalReport = reportDao.findById(reportId);
         if (optionalReport.isEmpty()) {
-            throw new ReportNotFound(reportId);
+            throw new ReportNotFoundException(reportId);
         }
 
         return optionalReport.get();
@@ -87,7 +87,7 @@ public abstract class AbstractFileService {
 
     private void verifyState(Report report) {
         if (!ReportStatus.isFinalState(report.getStatus())) {
-            throw new ReportIsNotInFinalState(report.getId());
+            throw new ReportIsNotInFinalStateException(report.getId());
         }
     }
 
@@ -96,7 +96,7 @@ public abstract class AbstractFileService {
             generateFileContent(outputStream, report);
             return outputStream.toByteArray();
         } catch (IOException e) {
-            throw new CanNotGenerateFile("report_" + report.getId());
+            throw new CanNotGenerateFileException("report_" + report.getId());
         }
     }
 
@@ -118,7 +118,7 @@ public abstract class AbstractFileService {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(fileContent);
         } catch (IOException e) {
-            throw new CanNotGenerateFile("Failed to write file: " + file.getName());
+            throw new CanNotGenerateFileException("Failed to write file: " + file.getName());
         }
 
         return ReportFile.builder()
@@ -146,11 +146,15 @@ public abstract class AbstractFileService {
         File file = new File(reportsDirectory + fileName);
 
         if (file.exists()) {
-            throw new ReportFileAlreadyStored(file.getAbsolutePath());
+            throw new ReportFileAlreadyStoredException(file.getAbsolutePath());
         }
 
         createParentDirectory(file);
         return file;
+    }
+
+    protected String generateReportName(Report report) {
+        return "report_" + report.getId() + "." + getMimeType().toString();
     }
 
     private void createParentDirectory(File file) {

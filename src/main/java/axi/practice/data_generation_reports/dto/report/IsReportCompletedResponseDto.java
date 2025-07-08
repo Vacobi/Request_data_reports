@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -15,5 +15,5 @@ public class IsReportCompletedResponseDto {
     private boolean completed;
 
     @Builder.Default
-    private LocalDate requestTime = LocalDate.now();
+    private LocalDateTime requestTime = LocalDateTime.now();
 }
